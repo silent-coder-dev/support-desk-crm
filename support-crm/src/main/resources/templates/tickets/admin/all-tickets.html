@@ -31,7 +31,7 @@
 
 <nav class="navbar-bright py-3">
     <div class="container-fluid px-4 d-flex justify-content-between align-items-center">
-        <a th:href="@{/tickets/admin/dashboard}" class="text-primary text-decoration-none fw-semibold d-flex align-items-center gap-2">
+        <a th:href="@{/admin/dashboard}" class="text-primary text-decoration-none fw-semibold d-flex align-items-center gap-2">
             <i class="bi bi-arrow-left"></i> Return to Admin Dashboard
         </a>
         <div class="d-flex align-items-center gap-2">
@@ -108,7 +108,7 @@
                     </td>
                     <td class="text-muted small" th:text="${#temporals.format(t.created_at, 'dd MMM yyyy, hh:mm a')}">Date</td>
                     <td class="text-end">
-                        <a th:href="@{'/tickets/admin/' + ${t.ticket_id}}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                        <a th:href="@{'/admin/tickets/' + ${t.ticket_id}}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
                             Inspect <i class="bi bi-chevron-right ms-1"></i>
                         </a>
                     </td>

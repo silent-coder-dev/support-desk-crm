@@ -274,7 +274,7 @@
                         </span>
                     </td>
                     <td>
-                        <a th:href="@{'/tickets/admin/' + ${log.ticketId}}" class="fw-bold text-primary text-decoration-none font-monospace" th:text="${log.ticketId}">TKT-001</a>
+                        <a th:href="@{'/admin/tickets/' + ${log.ticketId}}" class="fw-bold text-primary text-decoration-none font-monospace" th:text="${log.ticketId}">TKT-001</a>
                     </td>
                     <td>
                         <div class="d-flex align-items-center gap-2">
@@ -284,7 +284,7 @@
                     </td>
                     <td class="text-muted" th:text="${log.timestamp != null ? #temporals.format(log.timestamp, 'dd MMM yyyy, hh:mm:ss a') : 'Recently'}">Time</td>
                     <td class="text-end">
-                        <a th:href="@{'/tickets/admin/' + ${log.ticketId}}" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+                        <a th:href="@{'/admin/tickets/' + ${log.ticketId}}" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
                             Inspect <i class="bi bi-chevron-right"></i>
                         </a>
                     </td>

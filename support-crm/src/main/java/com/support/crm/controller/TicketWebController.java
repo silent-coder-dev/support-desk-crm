@@ -30,9 +30,10 @@ public class TicketWebController {
 
     @GetMapping("/")
     public String rootRedirect() {
-        return "redirect:/tickets";
+        return "landing";
     }
 
+    // 1. Agent Queue Dashboard
     @GetMapping("/tickets")
     public String dashboard(@RequestParam(required = false) TicketStatus status,
                             @RequestParam(required = false) String search,
@@ -42,6 +43,29 @@ public class TicketWebController {
         model.addAttribute("selectedStatus", status);
         model.addAttribute("searchQuery", search);
         return "tickets/dashboard";
+    }
+
+    // 2. Direct Handler for UI requests hitting /tickets/admin/all-tickets
+    @GetMapping("/tickets/admin/all-tickets")
+    public String adminAllTicketsView(@RequestParam(required = false) TicketStatus status,
+                                      @RequestParam(required = false) String search,
+                                      Model model) {
+        List<TicketSummaryResponse> tickets = ticketService.getAllTickets(status, search);
+        model.addAttribute("tickets", tickets);
+        model.addAttribute("selectedStatus", status);
+        model.addAttribute("searchQuery", search);
+        return "tickets/admin/all-tickets";
+    }
+
+    // 3. Fallbacks for admin navigation links
+    @GetMapping("/tickets/admin/dashboard")
+    public String returnToAdminDashboard() {
+        return "redirect:/admin/dashboard";
+    }
+
+    @GetMapping("/tickets/admin/{ticket_id}")
+    public String adminInspectFallback(@PathVariable("ticket_id") String ticketId) {
+        return "redirect:/admin/tickets/" + ticketId;
     }
 
     @GetMapping("/tickets/new")
@@ -90,7 +114,7 @@ public class TicketWebController {
             redirectAttributes.addFlashAttribute("toastMessage", "Ticket status and notes updated successfully!");
             redirectAttributes.addFlashAttribute("toastType", "success");
         } catch (OptimisticLockingFailureException ex) {
-            redirectAttributes.addFlashAttribute("toastMessage", "Conflict detected: Ticket was updated by another user. Please refresh and review.");
+            redirectAttributes.addFlashAttribute("toastMessage", "Conflict detected: Ticket was updated by another operator. Please review latest state.");
             redirectAttributes.addFlashAttribute("toastType", "danger");
         }
 

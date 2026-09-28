@@ -53,6 +53,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // 1. Static assets, uploaded avatars, auth endpoints, error page, public customer portal & SSE stream
                         .requestMatchers(
+                                "/",
                                 "/css/**",
                                 "/js/**",
                                 "/images/**",
@@ -68,10 +69,10 @@ public class SecurityConfig {
                         .requestMatchers("/profile/**").authenticated()
 
                         // 3. Admin dashboard
-                        .requestMatchers("/admin/**").hasAnyAuthority("ROLE_ADMIN", "ADMIN")
+                        .requestMatchers("/tickets/admin/**", "/admin/**").hasAnyAuthority("ROLE_ADMIN", "ADMIN")
 
                         // 4. Agent operations
-                        .requestMatchers("/tickets/**").hasAnyAuthority("ROLE_AGENT", "AGENT")
+                        .requestMatchers("/tickets/**").hasAnyAuthority("ROLE_AGENT", "AGENT", "ROLE_ADMIN", "ADMIN")
 
                         .anyRequest().authenticated()
                 )
@@ -91,7 +92,7 @@ public class SecurityConfig {
                         .permitAll()
                 )
                 .exceptionHandling(ex -> ex
-                        .accessDeniedPage("/login?error=access_denied")
+                        .accessDeniedPage("/error?status=403")
                 );
 
         return http.build();
@@ -105,7 +106,7 @@ public class SecurityConfig {
                         .fullname("Executive Administrator")
                         .username("admin")
                         .email("admin@supportcrm.com")
-                        .mobileNumber("9999999999")
+                        .mobileNumber("1234567890")
                         .password(encoder.encode("admin123"))
                         .role("ROLE_ADMIN")
                         .build());

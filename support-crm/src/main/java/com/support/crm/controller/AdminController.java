@@ -23,7 +23,7 @@ public class AdminController {
 
     private final TicketService ticketService;
 
-    // 1. PowerBI Executive Dashboard
+    // 1. Executive Operations & Analytics Dashboard
     @GetMapping("/dashboard")
     public String adminDashboard(Model model) {
         AdminAnalyticsResponse analytics = ticketService.getAdminAnalytics();
@@ -35,8 +35,8 @@ public class AdminController {
         return "tickets/admin/dashboard";
     }
 
-    // 2. Admin Inspection View: All Tickets Registry
-    @GetMapping("/tickets")
+    // 2. Admin Inspection View: All Tickets Registry (/admin/tickets and /admin/all-tickets)
+    @GetMapping({"/tickets", "/all-tickets"})
     public String viewAllTickets(@RequestParam(required = false) TicketStatus status,
                                  @RequestParam(required = false) String search,
                                  Model model) {

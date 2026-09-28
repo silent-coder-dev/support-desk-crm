@@ -19,19 +19,31 @@
 
 <nav class="navbar navbar-expand-lg navbar-dark navbar-custom py-3">
     <div class="container">
-        <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="/portal/inquiry">
+        <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="/">
             <span class="bg-primary text-white p-2 rounded-3 d-inline-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
                 <i class="bi bi-shield-check"></i>
             </span>
             <span>SupportDesk <span class="badge bg-secondary-subtle text-light-emphasis small fw-normal ms-1">Customer Portal</span></span>
         </a>
-        <a href="/portal/inquiry" class="btn btn-outline-light btn-sm rounded-pill px-3">
-            <i class="bi bi-plus-circle me-1"></i> New Inquiry
-        </a>
+        <div class="d-flex align-items-center gap-2">
+            <a href="/" class="btn btn-outline-light btn-sm rounded-pill px-3">
+                <i class="bi bi-house-door me-1"></i> Home
+            </a>
+            <a href="/portal/inquiry" class="btn btn-primary btn-sm rounded-pill px-3">
+                <i class="bi bi-plus-circle me-1"></i> New Inquiry
+            </a>
+        </div>
     </div>
 </nav>
 
 <div class="container my-auto py-5" style="max-width: 650px;">
+    <!-- Back Navigation Link -->
+    <div class="mb-3">
+        <a href="/" class="text-decoration-none text-muted small fw-semibold d-inline-flex align-items-center gap-1">
+            <i class="bi bi-arrow-left"></i> Back to Main Page
+        </a>
+    </div>
+
     <!-- Search Box -->
     <div class="card-surface p-4 mb-4">
         <h2 class="h5 fw-bold text-dark mb-3">Track Your Complaint Status</h2>
@@ -44,6 +56,9 @@
     <!-- Not Found Alert -->
     <div th:if="${notFound}" class="alert alert-danger rounded-4 shadow-sm text-center py-3 border-0">
         <i class="bi bi-exclamation-triangle-fill me-1"></i> No ticket found matching that reference ID. Please check and try again.
+        <div class="mt-2">
+            <a href="/" class="btn btn-sm btn-outline-danger rounded-pill px-3">Return to Main Page</a>
+        </div>
     </div>
 
     <!-- Ticket Detail Result -->
@@ -66,6 +81,12 @@
         </div>
         <div th:if="${#lists.isEmpty(ticket.notes)}" class="text-muted small fst-italic py-2 text-center">
             No agent updates logged yet. Your ticket is currently queued for assignment.
+        </div>
+
+        <div class="mt-4 pt-3 border-top text-center">
+            <a href="/" class="btn btn-outline-secondary btn-sm rounded-pill px-4">
+                <i class="bi bi-house me-1"></i> Back to Main Page
+            </a>
         </div>
     </div>
 </div>
