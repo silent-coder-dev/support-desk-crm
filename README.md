@@ -293,23 +293,44 @@ support-desk-crm/
         ├── portal/                       # Public ticket intake & live tracking
         ├── profile/                      # Operator profile & security controls
         └── tickets/                      # Queue dashboard, ticket detail & admin console
-## 🌐 Live Application & Endpoints
 
-- [Root Landing Portal](https://support-desk-crm-qs00.onrender.com/)
-- [Customer Intake Portal](https://support-desk-crm-qs00.onrender.com/portal/inquiry)
-- [Live Ticket Tracking](https://support-desk-crm-qs00.onrender.com/portal/track)
-- [Operator Queue Console](https://support-desk-crm-qs00.onrender.com/tickets)
-- [Create Ticket (Operator Console)](https://support-desk-crm-qs00.onrender.com/tickets/new)
-- [Operator Profile & Settings](https://support-desk-crm-qs00.onrender.com/profile)
+🌐 Live Application
+Root Landing Portal
+https://support-desk-crm-qs00.onrender.com/
 
----
+Customer Intake Portal
+https://support-desk-crm-qs00.onrender.com/portal/inquiry
 
-### 🔐 Authentication & Administration Endpoints
+Live Ticket Tracking
+https://support-desk-crm-qs00.onrender.com/portal/track
 
-- [Operator Sign In](https://support-desk-crm-qs00.onrender.com/login)
-- [Agent Enrolment / Sign Up](https://support-desk-crm-qs00.onrender.com/signup)
-- [Executive Admin Dashboard](https://support-desk-crm-qs00.onrender.com/admin/dashboard)
-- [Admin Full Ticket Registry](https://support-desk-crm-qs00.onrender.com/admin/tickets) *(Fallback alias: [Admin All Tickets](https://support-desk-crm-qs00.onrender.com/tickets/admin/all-tickets))*
+Operator Queue Console
+https://support-desk-crm-qs00.onrender.com/tickets
+
+Create Ticket — Operator Console
+https://support-desk-crm-qs00.onrender.com/tickets/new
+
+Operator Profile & Settings
+https://support-desk-crm-qs00.onrender.com/profile
+
+🔐 Authentication & Administration
+Operator Sign In
+https://support-desk-crm-qs00.onrender.com/login
+
+Agent Enrolment / Sign Up
+https://support-desk-crm-qs00.onrender.com/signup
+
+Executive Admin Dashboard
+https://support-desk-crm-qs00.onrender.com/admin/dashboard
+
+Admin Full Ticket Registry
+https://support-desk-crm-qs00.onrender.com/admin/tickets
+
+Admin All Tickets — Fallback Alias
+https://support-desk-crm-qs00.onrender.com/tickets/admin/all-tickets
+
+
+
 
 🔑 System Roles & Access Matrix
 📄 License
