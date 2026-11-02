@@ -1,214 +1,63 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agent Enrolment | SupportDesk CRM</title>
-    <!-- Blue Shield Tab Logo -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%230d6efd'%3E%3Cpath d='M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z'/%3E%3C/svg%3E">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 1.5rem;
-        }
-        .auth-card {
-            background: #ffffff;
-            border-radius: 20px;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 480px;
-            padding: 2.25rem;
-        }
-        .progress-bar-strength {
-            height: 6px;
-            border-radius: 4px;
-            transition: width 0.3s ease, background-color 0.3s ease;
-        }
-        .rule-item { font-size: 0.725rem; color: #64748b; }
-        .rule-item.valid { color: #16a34a; font-weight: 600; }
-        .form-control {
-            border-radius: 8px;
-            border: 1px solid #cbd5e1;
-        }
-    </style>
-</head>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{fragments/layout :: head('Create agent account')}"></head>
 <body>
 
-<div class="w-100 max-w-480 mb-3" style="max-width: 480px;">
-    <a href="/" class="text-white text-opacity-75 text-decoration-none small fw-semibold d-inline-flex align-items-center gap-1">
-        <i class="bi bi-arrow-left"></i> Back to Main Page
-    </a>
+<div class="center-shell">
+    <div class="center-brand"><a th:replace="~{fragments/layout :: brand('/')}"></a></div>
+
+    <main class="card-surface center-card center-card-wide">
+        <h1 class="h4 mb-1">Create agent account</h1>
+        <p class="text-muted small mb-3">Agents can view and update all customer tickets.</p>
+
+        <form th:action="@{/signup}" th:object="${registerRequest}" method="post">
+            <div class="mb-3">
+                <label for="fullname" class="form-label">Full name</label>
+                <input type="text" th:field="*{fullname}" class="form-control" autocomplete="name" required>
+                <div class="field-error" th:if="${#fields.hasErrors('fullname')}" th:errors="*{fullname}"></div>
+            </div>
+            <div class="mb-3">
+                <label for="username" class="form-label">Username</label>
+                <input type="text" th:field="*{username}" class="form-control" autocomplete="username" required>
+                <div class="field-hint">Lowercase letters and numbers only, 3 to 25 characters.</div>
+                <div class="field-error" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></div>
+            </div>
+            <div class="mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" th:field="*{email}" class="form-control" autocomplete="email" required>
+                <div class="field-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+            </div>
+            <div class="mb-3">
+                <label for="mobileNumber" class="form-label">Mobile number</label>
+                <input type="tel" th:field="*{mobileNumber}" class="form-control" autocomplete="tel" placeholder="10 digits" required>
+                <div class="field-error" th:if="${#fields.hasErrors('mobileNumber')}" th:errors="*{mobileNumber}"></div>
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" th:field="*{password}" class="form-control" autocomplete="new-password" required>
+                <ul class="rule-list" id="passwordRules">
+                    <li data-rule=".{8,}">8 or more characters</li>
+                    <li data-rule="[a-z]">A lowercase letter</li>
+                    <li data-rule="[A-Z]">An uppercase letter</li>
+                    <li data-rule="[0-9]">A number</li>
+                    <li data-rule="[@$!%*?&#]">One of @$!%*?&amp;#</li>
+                </ul>
+                <div class="field-error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Create account</button>
+        </form>
+    </main>
+
+    <div class="center-links">Already have an account? <a th:href="@{/staff-login}">Sign in</a></div>
 </div>
 
-<div class="auth-card">
-    <div class="text-center mb-4">
-        <div class="bg-primary text-white p-3 rounded-4 d-inline-flex align-items-center justify-content-center shadow-sm mb-2" style="width: 50px; height: 50px;">
-            <i class="bi bi-person-plus-fill fs-4"></i>
-        </div>
-        <h1 class="h4 fw-bold text-dark mb-0">Agent Registration</h1>
-        <p class="text-muted small">Register an operational account to manage support tickets</p>
-    </div>
-
-    <form th:action="@{/signup}" th:object="${registerRequest}" method="post" id="signupForm">
-        <div class="mb-3">
-            <label class="form-label small fw-semibold text-secondary">Full Legal Name</label>
-            <div class="input-group">
-                <span class="input-group-text bg-light text-muted"><i class="bi bi-person"></i></span>
-                <input type="text" th:field="*{fullname}" class="form-control" placeholder="Satyam Singh" required />
-            </div>
-            <div class="text-danger small mt-1" th:if="${#fields.hasErrors('fullname')}" th:errors="*{fullname}"></div>
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label small fw-semibold text-secondary">Username (lowercase & digits)</label>
-            <div class="input-group">
-                <span class="input-group-text bg-light text-muted">@</span>
-                <input type="text" id="usernameInput" th:field="*{username}" class="form-control" placeholder="satyam01" required />
-            </div>
-            <div class="text-danger small mt-1" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></div>
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label small fw-semibold text-secondary">Corporate Email</label>
-            <div class="input-group">
-                <span class="input-group-text bg-light text-muted"><i class="bi bi-envelope"></i></span>
-                <input type="email" th:field="*{email}" class="form-control" placeholder="satyam@supportcrm.com" required />
-            </div>
-            <div class="text-danger small mt-1" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label small fw-semibold text-secondary">Mobile Number</label>
-            <div class="input-group">
-                <span class="input-group-text bg-light text-muted">+91</span>
-                <input type="tel" th:field="*{mobileNumber}" class="form-control" placeholder="10-digit phone" required />
-            </div>
-            <div class="text-danger small mt-1" th:if="${#fields.hasErrors('mobileNumber')}" th:errors="*{mobileNumber}"></div>
-        </div>
-
-        <div class="mb-2">
-            <label class="form-label small fw-semibold text-secondary">Passkey</label>
-            <div class="input-group">
-                <span class="input-group-text bg-light text-muted"><i class="bi bi-key"></i></span>
-                <input type="password" id="passwordInput" th:field="*{password}" class="form-control" placeholder="Create secure password" required />
-                <button class="btn btn-outline-secondary" type="button" id="togglePasswordBtn">
-                    <i class="bi bi-eye" id="toggleIcon"></i>
-                </button>
-            </div>
-            <div class="text-danger small mt-1" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
-        </div>
-
-        <div class="mb-3">
-            <div class="d-flex justify-content-between align-items-center mb-1">
-                <span class="small text-muted" style="font-size: 0.75rem;">Password Strength:</span>
-                <span id="strengthText" class="badge rounded-pill" style="font-size: 0.7rem;">None</span>
-            </div>
-            <div class="progress" style="height: 6px; background-color: #e2e8f0;">
-                <div id="strengthBar" class="progress-bar progress-bar-strength" role="progressbar" style="width: 0%;"></div>
-            </div>
-            <div class="row g-1 mt-2">
-                <div class="col-6 rule-item" id="ruleLower"><i class="bi bi-dash-circle me-1"></i>1 Lowercase (a-z)</div>
-                <div class="col-6 rule-item" id="ruleUpper"><i class="bi bi-dash-circle me-1"></i>1 Uppercase (A-Z)</div>
-                <div class="col-6 rule-item" id="ruleDigit"><i class="bi bi-dash-circle me-1"></i>1 Numeric (0-9)</div>
-                <div class="col-6 rule-item" id="ruleSpecial"><i class="bi bi-dash-circle me-1"></i>1 Special (@$!%*?&#)</div>
-            </div>
-        </div>
-
-        <button type="submit" id="submitBtn" class="btn btn-primary w-100 py-2.5 rounded-pill fw-semibold shadow-sm mt-3">
-            Complete Registration <i class="bi bi-arrow-right ms-1"></i>
-        </button>
-    </form>
-
-    <div class="text-center pt-3 border-top mt-4">
-        <span class="text-muted small">Already enrolled?</span>
-        <a th:href="@{/login}" class="fw-bold text-primary text-decoration-none small ms-1">Sign In</a>
-    </div>
-</div>
-
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
 <script>
-    const togglePasswordBtn = document.getElementById('togglePasswordBtn');
-    const passwordInput = document.getElementById('passwordInput');
-    const toggleIcon = document.getElementById('toggleIcon');
-
-    togglePasswordBtn.addEventListener('click', () => {
-        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-        passwordInput.setAttribute('type', type);
-        toggleIcon.classList.toggle('bi-eye');
-        toggleIcon.classList.toggle('bi-eye-slash');
-    });
-
-    const usernameInput = document.getElementById('usernameInput');
-    usernameInput.addEventListener('input', function() {
-        this.value = this.value.toLowerCase().replace(/[^a-z0-9]/g, '');
-    });
-
-    const strengthBar = document.getElementById('strengthBar');
-    const strengthText = document.getElementById('strengthText');
-    const ruleLower = document.getElementById('ruleLower');
-    const ruleUpper = document.getElementById('ruleUpper');
-    const ruleDigit = document.getElementById('ruleDigit');
-    const ruleSpecial = document.getElementById('ruleSpecial');
-
-    function updateRule(element, isValid, label) {
-        if (isValid) {
-            element.className = 'col-6 rule-item valid';
-            element.innerHTML = `<i class="bi bi-check-circle-fill me-1 text-success"></i>${label}`;
-        } else {
-            element.className = 'col-6 rule-item';
-            element.innerHTML = `<i class="bi bi-dash-circle me-1"></i>${label}`;
-        }
-    }
-
-    passwordInput.addEventListener('input', function() {
-        const val = this.value;
-        const hasLower = /[a-z]/.test(val);
-        const hasUpper = /[A-Z]/.test(val);
-        const hasDigit = /[0-9]/.test(val);
-        const hasSpecial = /[@$!%*?&#]/.test(val);
-        const hasLength = val.length >= 8;
-
-        updateRule(ruleLower, hasLower, "1 Lowercase (a-z)");
-        updateRule(ruleUpper, hasUpper, "1 Uppercase (A-Z)");
-        updateRule(ruleDigit, hasDigit, "1 Numeric (0-9)");
-        updateRule(ruleSpecial, hasSpecial, "1 Special (@$!%*?&#)");
-
-        let score = 0;
-        if (hasLower) score++;
-        if (hasUpper) score++;
-        if (hasDigit) score++;
-        if (hasSpecial) score++;
-        if (hasLength) score++;
-
-        if (val.length === 0) {
-            strengthBar.style.width = '0%';
-            strengthBar.style.backgroundColor = '';
-            strengthText.innerText = 'None';
-            strengthText.className = 'badge text-bg-light';
-        } else if (score <= 2) {
-            strengthBar.style.width = '33%';
-            strengthBar.style.backgroundColor = '#dc3545';
-            strengthText.innerText = 'Poor';
-            strengthText.className = 'badge text-bg-danger';
-        } else if (score <= 4) {
-            strengthBar.style.width = '66%';
-            strengthBar.style.backgroundColor = '#ffc107';
-            strengthText.innerText = 'Average';
-            strengthText.className = 'badge text-bg-warning text-dark';
-        } else {
-            strengthBar.style.width = '100%';
-            strengthBar.style.backgroundColor = '#198754';
-            strengthText.innerText = 'Excellent';
-            strengthText.className = 'badge text-bg-success';
-        }
+    // Ticks off each password rule as it is met
+    document.getElementById('password').addEventListener('input', event => {
+        document.querySelectorAll('#passwordRules li').forEach(rule => {
+            rule.classList.toggle('met', new RegExp(rule.dataset.rule).test(event.target.value));
+        });
     });
 </script>
 </body>

@@ -5,6 +5,7 @@ import com.support.crm.dto.TicketDetailResponse;
 import com.support.crm.dto.TicketSummaryResponse;
 import com.support.crm.model.TicketAuditLog;
 import com.support.crm.model.TicketStatus;
+import com.support.crm.service.AdminDashboardService;
 import com.support.crm.service.TicketService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -22,12 +23,13 @@ import java.util.List;
 public class AdminController {
 
     private final TicketService ticketService;
+    private final AdminDashboardService adminDashboardService;
 
     // 1. Executive Operations & Analytics Dashboard
     @GetMapping("/dashboard")
     public String adminDashboard(Model model) {
-        AdminAnalyticsResponse analytics = ticketService.getAdminAnalytics();
-        List<TicketAuditLog> recentLogs = ticketService.getRecentAuditLogs();
+        AdminAnalyticsResponse analytics = adminDashboardService.getAdminAnalytics();
+        List<TicketAuditLog> recentLogs = adminDashboardService.getRecentAuditLogs();
 
         model.addAttribute("analytics", analytics);
         model.addAttribute("auditLogs", recentLogs);
@@ -44,6 +46,7 @@ public class AdminController {
         model.addAttribute("tickets", tickets);
         model.addAttribute("selectedStatus", status);
         model.addAttribute("searchQuery", search);
+        model.addAttribute("ticketLimit", TicketService.TICKET_LIST_LIMIT);
         return "tickets/admin/all-tickets";
     }
 

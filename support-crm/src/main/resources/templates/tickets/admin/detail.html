@@ -1,181 +1,61 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="'Inspect ' + ${ticket.ticket_id} + ' | SupportDesk Admin'">Ticket Inspection</title>
-    <!-- Blue Shield Tab Favicon -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%230d6efd'%3E%3Cpath d='M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z'/%3E%3C/svg%3E">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: #f8fafc;
-            color: #1e293b;
-            min-height: 100vh;
-        }
-        .navbar-bright {
-            background-color: #ffffff;
-            border-bottom: 1px solid #e2e8f0;
-        }
-        .card-surface {
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-radius: 14px;
-            padding: 1.5rem;
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04);
-        }
-        .timeline {
-            border-left: 2px solid #e2e8f0;
-            margin-left: 0.5rem;
-            padding-left: 1.25rem;
-        }
-        .timeline-item {
-            position: relative;
-            margin-bottom: 1.5rem;
-        }
-        .timeline-item::before {
-            content: '';
-            position: absolute;
-            left: -1.7rem;
-            top: 0.35rem;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background-color: #0284c7;
-            border: 3px solid #ffffff;
-            box-shadow: 0 0 0 1px #cbd5e1;
-        }
-        .user-nav-chip {
-            background-color: #f1f5f9;
-            border: 1px solid #cbd5e1;
-            padding: 0.3rem 0.75rem 0.3rem 0.4rem;
-            border-radius: 9999px;
-            text-decoration: none;
-            color: #1e293b;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        .user-nav-avatar { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; }
-        .user-nav-placeholder { width: 28px; height: 28px; border-radius: 50%; background-color: #0d6efd; color: #ffffff; display: inline-flex; align-items: center; justify-content: center; font-size: 0.8rem; }
-    </style>
-</head>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{fragments/layout :: head(${ticket.ticket_id})}"></head>
 <body>
 
-<nav class="navbar-bright py-3 sticky-top">
-    <div class="container d-flex justify-content-between align-items-center">
-        <a th:href="@{/tickets/admin/all-tickets}" class="text-primary text-decoration-none fw-semibold d-flex align-items-center gap-2">
-            <i class="bi bi-arrow-left"></i> Return to Tickets Registry
-        </a>
-        <div class="d-flex align-items-center gap-2">
-            <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-3 py-2 rounded-pill fw-bold">
-                <i class="bi bi-eye me-1"></i> Read-Only Admin Inspection
-            </span>
-            <a href="/profile" class="user-nav-chip">
-                <img th:if="${currentUser != null and currentUser.avatarUrl != null}"
-                     th:src="${currentUser.avatarUrl}" class="user-nav-avatar" alt="Avatar">
-                <span th:if="${currentUser == null or currentUser.avatarUrl == null}" class="user-nav-placeholder">
-                    <i class="bi bi-person-fill"></i>
-                </span>
-                <span class="small fw-semibold" th:text="${currentUser != null ? currentUser.fullname : 'Admin'}">Admin</span>
-            </a>
-            <a th:href="@{/logout}" class="btn btn-outline-danger btn-sm rounded-pill px-3 fw-semibold">
-                <i class="bi bi-box-arrow-right me-1"></i> Logout
-            </a>
+<nav th:replace="~{fragments/layout :: appNav('registry')}"></nav>
+
+<main class="container page">
+    <a th:href="@{/admin/tickets}" class="back-link"><i class="bi bi-arrow-left" aria-hidden="true"></i>All tickets</a>
+    <div class="page-header">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="ticket-id" th:text="${ticket.ticket_id}">TKT-001</span>
+                <span th:replace="~{fragments/layout :: status(${ticket.status})}"></span>
+            </div>
+            <h1 class="page-title" th:text="${ticket.subject}">Subject</h1>
+        </div>
+        <a th:href="@{'/tickets/' + ${ticket.ticket_id}}" class="btn btn-outline">Open in queue to edit</a>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-lg-8">
+            <section class="card-surface card-body-pad mb-3">
+                <h2 class="section-title">Description</h2>
+                <p class="body-text" th:text="${ticket.description}">Description</p>
+            </section>
+            <section class="card-surface card-body-pad">
+                <h2 class="section-title">Activity</h2>
+                <div th:each="n : ${ticket.notes}" class="note">
+                    <div class="note-meta">
+                        <span class="note-author" th:text="${n.author_name}">Support Agent</span>
+                        <span class="note-time" th:text="${#temporals.format(n.created_at, 'dd MMM yyyy, hh:mm a')}">Time</span>
+                    </div>
+                    <p class="body-text" th:text="${n.note_text}">Note</p>
+                </div>
+                <p th:if="${#lists.isEmpty(ticket.notes)}" class="text-muted small mb-0">No notes yet.</p>
+            </section>
+        </div>
+        <div class="col-lg-4">
+            <section class="card-surface card-body-pad">
+                <h2 class="section-title">Customer</h2>
+                <div class="mb-3">
+                    <div class="detail-label">Name</div>
+                    <div class="detail-value" th:text="${ticket.customer_name}">Name</div>
+                </div>
+                <div class="mb-3">
+                    <div class="detail-label">Email</div>
+                    <div class="detail-value"><a th:href="'mailto:' + ${ticket.customer_email}" th:text="${ticket.customer_email}">email</a></div>
+                </div>
+                <div>
+                    <div class="detail-label">Version</div>
+                    <div class="detail-value mono" th:text="${ticket.version}">0</div>
+                </div>
+            </section>
         </div>
     </div>
-</nav>
+</main>
 
-<div class="container my-4 my-md-5">
-    <div class="row g-4">
-        <div class="col-12 col-lg-8">
-            <!-- Ticket Overview Card -->
-            <div class="card-surface mb-4">
-                <div class="d-flex justify-content-between align-items-start mb-3">
-                    <div>
-                        <span class="badge bg-light text-primary border font-monospace px-2.5 py-1 mb-2" th:text="${ticket.ticket_id}">TKT-001</span>
-                        <h1 class="h4 fw-bold text-dark mb-1" th:text="${ticket.subject}">Subject Line</h1>
-                    </div>
-                    <span class="badge rounded-pill px-3 py-2"
-                          th:classappend="${ticket.status.name() == 'OPEN' ? 'bg-info-subtle text-info border border-info-subtle' : (ticket.status.name() == 'IN_PROGRESS' ? 'bg-warning-subtle text-warning border border-warning-subtle' : 'bg-success-subtle text-success border border-success-subtle')}"
-                          th:text="${ticket.status}">OPEN</span>
-                </div>
-
-                <h6 class="text-muted small fw-bold text-uppercase mb-2">Original Inquiry Details</h6>
-                <div class="p-3 bg-light rounded-3 border text-break" style="white-space: pre-wrap; line-height: 1.6;" th:text="${ticket.description}">
-                    Inquiry description text...
-                </div>
-            </div>
-
-            <!-- Notes & Audit Trail -->
-            <div class="card-surface">
-                <h6 class="text-muted small fw-bold text-uppercase mb-4">
-                    <i class="bi bi-clock-history me-1"></i> Recorded Activity & Agent Notes
-                </h6>
-
-                <div class="timeline" th:if="${not #lists.isEmpty(ticket.notes)}">
-                    <div class="timeline-item" th:each="n : ${ticket.notes}">
-                        <div class="d-flex align-items-center justify-content-between mb-2 flex-wrap gap-2">
-                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-2.5 py-1 small fw-semibold">
-                                <i class="bi bi-person-fill me-1"></i>
-                                <span th:text="${n.author_name != null ? n.author_name : 'Support Agent'}">Support Agent</span>
-                            </span>
-                            <span class="text-muted small">
-                                <i class="bi bi-calendar3 me-1"></i>
-                                <span th:text="${n.created_at != null ? #temporals.format(n.created_at, 'dd MMM yyyy, hh:mm a') : 'Recently Added'}">Time</span>
-                            </span>
-                        </div>
-                        <div class="p-3 bg-light rounded-3 border text-dark text-break" th:text="${n.note_text}">
-                            Agent progress note
-                        </div>
-                    </div>
-                </div>
-
-                <div th:if="${#lists.isEmpty(ticket.notes)}" class="text-center text-muted py-4">
-                    <i class="bi bi-chat-left-dots fs-2 d-block text-secondary mb-2"></i>
-                    No internal notes have been logged for this ticket yet.
-                </div>
-            </div>
-        </div>
-
-        <!-- Metadata & Customer Identity Card -->
-        <div class="col-12 col-lg-4">
-            <div class="card-surface mb-4">
-                <h6 class="text-muted small fw-bold text-uppercase mb-3">Customer Identity</h6>
-                <div class="mb-3">
-                    <div class="text-muted small">Customer Name</div>
-                    <div class="fw-bold text-dark" th:text="${ticket.customer_name}">John Doe</div>
-                </div>
-                <div class="mb-3">
-                    <div class="text-muted small">Email Address</div>
-                    <div class="fw-bold text-dark text-break" th:text="${ticket.customer_email}">john@example.com</div>
-                </div>
-                <div class="mb-3">
-                    <div class="text-muted small">Concurrency Lock Version</div>
-                    <span class="badge bg-light text-secondary border font-monospace" th:text="'v' + ${ticket.version}">v0</span>
-                </div>
-                <div class="pt-3 border-top">
-                    <div class="text-muted small mb-1">Access Scope</div>
-                    <div class="small fw-semibold text-secondary d-flex align-items-center gap-1">
-                        <i class="bi bi-shield-lock"></i> Super Admin Inspection View
-                    </div>
-                </div>
-            </div>
-
-            <!-- Agent Assignment Quick-Action Link -->
-            <div class="card-surface p-3 bg-light">
-                <div class="small text-muted mb-2">Need to triage or modify this ticket as an active operator?</div>
-                <a th:href="@{'/tickets/' + ${ticket.ticket_id}}" class="btn btn-outline-primary btn-sm w-100 rounded-pill fw-semibold">
-                    <i class="bi bi-pencil-square me-1"></i> Open in Operator Console
-                </a>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
 </body>
 </html>

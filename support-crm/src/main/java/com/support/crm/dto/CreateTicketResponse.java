@@ -13,4 +13,5 @@ import java.time.LocalDateTime;
 public class CreateTicketResponse {
     private String ticket_id;
     private LocalDateTime created_at;
+    private boolean existing; // True when this request joined a ticket that is already open
 }

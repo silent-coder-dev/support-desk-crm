@@ -21,6 +21,7 @@ public class User {
     private String username;
 
     @Column(nullable = false)
+    @ToString.Exclude // Password hash must never reach the logs
     private String password;
 
     @Column(nullable = false)
@@ -37,4 +38,9 @@ public class User {
 
     @Column(nullable = false)
     private String role;
+
+    // A disabled account can't log in, but stays in the database so old tickets keep their agent's name
+    @Column(nullable = false)
+    @Builder.Default
+    private boolean disabled = false;
 }

@@ -1,7 +1,7 @@
 package com.support.crm.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,7 +13,7 @@ public class ChangePasswordRequest {
     private String currentPassword;
 
     @NotBlank(message = "New password is required")
-    @Size(min = 6, message = "Password must be at least 6 characters")
+    @Pattern(regexp = RegisterRequest.PASSWORD_PATTERN, message = RegisterRequest.PASSWORD_MESSAGE)
     private String newPassword;
 
     @NotBlank(message = "Confirmation password is required")

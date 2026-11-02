@@ -12,7 +12,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "tickets")
+@Table(name = "tickets", indexes = {
+        @Index(name = "idx_tickets_status", columnList = "status"),
+        @Index(name = "idx_tickets_created_at", columnList = "created_at")
+})
 @Setter
 @Getter
 @AllArgsConstructor
@@ -45,6 +48,7 @@ public class Ticket {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @Builder.Default
     private TicketStatus status = TicketStatus.OPEN;
 
     // Optimistic locking field to prevent race conditions on concurrent updates
@@ -67,11 +71,13 @@ public class Ticket {
     private String assignedAgentName;
 
     @Column(name = "claimed_at")
-    private java.time.LocalDateTime claimedAt;
+    private LocalDateTime claimedAt;
 
     @Column(name = "resolved_at")
-    private java.time.LocalDateTime resolvedAt;
+    private LocalDateTime resolvedAt;
 
     @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("createdAt ASC")
+    @Builder.Default
     private List<Note> notes = new ArrayList<>();
 }

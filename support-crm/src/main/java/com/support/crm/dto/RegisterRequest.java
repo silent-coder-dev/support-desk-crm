@@ -11,7 +11,12 @@ import lombok.Setter;
 @Setter
 public class RegisterRequest {
 
+    // Upper limit is 72 because BCrypt cannot hash longer passwords
+    public static final String PASSWORD_PATTERN = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&#])[A-Za-z\\d@$!%*?&#]{8,72}$";
+    public static final String PASSWORD_MESSAGE = "Password must contain at least 1 lowercase, 1 uppercase, 1 number, 1 special character (@$!%*?&#), and 8 to 72 characters";
+
     @NotBlank(message = "Full name is required")
+    @Size(max = 255, message = "Full name is too long")
     private String fullname;
 
     @NotBlank(message = "Username is required")
@@ -21,6 +26,7 @@ public class RegisterRequest {
 
     @NotBlank(message = "Email is required")
     @Email(message = "Please enter a valid email address")
+    @Size(max = 255, message = "Email is too long")
     private String email;
 
     @NotBlank(message = "Mobile number is required")
@@ -28,9 +34,6 @@ public class RegisterRequest {
     private String mobileNumber;
 
     @NotBlank(message = "Password is required")
-    @Pattern(
-            regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&#])[A-Za-z\\d@$!%*?&#]{8,}$",
-            message = "Password must contain at least 1 lowercase, 1 uppercase, 1 number, 1 special character (@$!%*?&#), and min 8 characters"
-    )
+    @Pattern(regexp = PASSWORD_PATTERN, message = PASSWORD_MESSAGE)
     private String password;
 }

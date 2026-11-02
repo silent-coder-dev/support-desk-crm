@@ -1,267 +1,87 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title th:text="'Ticket ' + ${ticket.ticket_id} + ' | Support CRM'">Ticket Detail</title>
-  <!-- Blue Shield Tab Favicon -->
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%230d6efd'%3E%3Cpath d='M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z'/%3E%3C/svg%3E">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <style>
-    body {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      background-color: #f8fafc;
-      color: #1e293b;
-      min-height: 100vh;
-    }
-    .navbar-custom {
-      background-color: #0f172a;
-      border-bottom: 1px solid #1e293b;
-    }
-    .card-surface {
-      background: #ffffff;
-      border: 1px solid #e2e8f0;
-      border-radius: 14px;
-      box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04);
-    }
-    .badge-pill-custom {
-      padding: 0.4rem 0.85rem;
-      font-size: 0.8rem;
-      font-weight: 600;
-      border-radius: 9999px;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-    }
-    .badge-open { background-color: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
-    .badge-in_progress { background-color: #fefce8; color: #a16207; border: 1px solid #fef08a; }
-    .badge-closed { background-color: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
-
-    .timeline {
-      border-left: 2px solid #e2e8f0;
-      margin-left: 0.5rem;
-      padding-left: 1.25rem;
-    }
-    .timeline-item {
-      position: relative;
-      margin-bottom: 1.5rem;
-    }
-    .timeline-item::before {
-      content: '';
-      position: absolute;
-      left: -1.7rem;
-      top: 0.35rem;
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      background-color: #0284c7;
-      border: 3px solid #ffffff;
-      box-shadow: 0 0 0 1px #cbd5e1;
-    }
-    .user-chip {
-      background-color: #f1f5f9;
-      padding: 0.75rem 1rem;
-      border-radius: 10px;
-      border: 1px solid #e2e8f0;
-    }
-
-    .user-nav-chip {
-      background-color: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      padding: 0.3rem 0.75rem 0.3rem 0.4rem;
-      border-radius: 9999px;
-      text-decoration: none;
-      color: #ffffff;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      transition: background-color 0.2s ease;
-    }
-    .user-nav-chip:hover {
-      background-color: rgba(255, 255, 255, 0.15);
-      color: #ffffff;
-    }
-    .user-nav-avatar {
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      object-fit: cover;
-    }
-    .user-nav-placeholder {
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      background-color: #0d6efd;
-      color: #ffffff;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.8rem;
-    }
-  </style>
-</head>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{fragments/layout :: head(${ticket.ticket_id})}"></head>
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-dark navbar-custom py-3">
-  <div class="container">
-    <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="/tickets">
-      <span class="bg-primary text-white p-2 rounded-3 d-inline-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
-        <i class="bi bi-shield-check"></i>
-      </span>
-      <span>SupportDesk <span class="badge bg-secondary-subtle text-light-emphasis small fw-normal ms-1">CRM</span></span>
-    </a>
+<nav th:replace="~{fragments/layout :: appNav('queue')}"></nav>
 
-    <div class="d-flex align-items-center gap-2">
-      <!-- Agent Profile Navigation Chip -->
-      <a href="/profile" class="user-nav-chip">
-        <img th:if="${currentUser != null and currentUser.avatarUrl != null}"
-             th:src="${currentUser.avatarUrl}"
-             class="user-nav-avatar" alt="Avatar">
-        <span th:if="${currentUser == null or currentUser.avatarUrl == null}"
-              class="user-nav-placeholder">
-          <i class="bi bi-person-fill"></i>
-        </span>
-        <span class="small fw-semibold"
-              th:text="${currentUser != null ? currentUser.fullname : 'Profile'}">Agent</span>
-      </a>
-
-      <a href="/tickets" class="btn btn-outline-light btn-sm px-3 rounded-pill fw-semibold">
-        <i class="bi bi-arrow-left me-1"></i> Dashboard
-      </a>
-
-      <a href="/logout" class="btn btn-outline-danger btn-sm px-3 rounded-pill fw-semibold">
-        <i class="bi bi-box-arrow-right me-1"></i> Logout
-      </a>
-    </div>
-  </div>
-</nav>
-
-<div class="container my-4 my-md-5">
-  <div class="row g-4">
-    <div class="col-12 col-lg-7">
-      <!-- Ticket Details Card -->
-      <div class="card-surface p-4 mb-4">
-        <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
-          <div>
-            <span class="badge bg-light text-secondary border font-monospace px-2.5 py-1 mb-2" th:text="${ticket.ticket_id}">TKT-001</span>
-            <h1 class="h4 fw-bold mb-1 text-dark" th:text="${ticket.subject}">Subject Line</h1>
-          </div>
-          <span class="badge-pill-custom" th:classappend="'badge-' + ${#strings.toLowerCase(ticket.status)}">
-            <i class="bi bi-circle-fill" style="font-size: 0.45rem;"></i>
-            <span th:text="${ticket.status}">OPEN</span>
-          </span>
-        </div>
-
-        <div class="user-chip mb-4">
-          <div class="row g-2 small">
-            <div class="col-12 col-sm-6 text-truncate">
-              <i class="bi bi-person text-muted me-1"></i>
-              <strong>Customer:</strong> <span class="text-dark fw-medium" th:text="${ticket.customer_name}">John Doe</span>
+<main class="container page" th:with="canEdit=${ticket.assigned_agent_id == null or (currentUser != null and (ticket.assigned_agent_id == currentUser.id or #strings.endsWith(currentUser.role, 'ADMIN')))}">
+    <a th:href="@{/tickets}" class="back-link"><i class="bi bi-arrow-left" aria-hidden="true"></i>Queue</a>
+    <div class="page-header">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="ticket-id" th:text="${ticket.ticket_id}">TKT-001</span>
+                <span th:replace="~{fragments/layout :: status(${ticket.status})}"></span>
             </div>
-            <div class="col-12 col-sm-6 text-truncate">
-              <i class="bi bi-envelope text-muted me-1"></i>
-              <strong>Email:</strong> <span class="text-dark fw-medium" th:text="${ticket.customer_email}">john@example.com</span>
-            </div>
-          </div>
+            <h1 class="page-title" th:text="${ticket.subject}">Subject</h1>
         </div>
-
-        <h2 class="h6 fw-bold text-uppercase text-secondary mb-2" style="font-size: 0.75rem; letter-spacing: 0.05em;">Issue Description</h2>
-        <div class="p-3 border rounded-3 bg-light text-break" style="white-space: pre-wrap; font-size: 0.925rem; line-height: 1.6;" th:text="${ticket.description}">
-          Ticket body description goes here.
-        </div>
-      </div>
-
-      <!-- Chronological Activity Timeline -->
-      <div class="card-surface p-4">
-        <h2 class="h6 fw-bold text-uppercase text-secondary mb-4" style="font-size: 0.75rem; letter-spacing: 0.05em;">
-          <i class="bi bi-clock-history me-1"></i> Activity & Progress Notes
-        </h2>
-        <div class="timeline" th:if="${not #lists.isEmpty(ticket.notes)}">
-          <div class="timeline-item" th:each="n : ${ticket.notes}">
-            <div class="d-flex align-items-center justify-content-between mb-2 flex-wrap gap-2">
-              <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-2.5 py-1 small fw-semibold">
-                <i class="bi bi-person-fill me-1"></i>
-                <span th:text="${n.author_name != null ? n.author_name : 'Support Agent'}">Support Agent</span>
-              </span>
-              <span class="text-muted small">
-                <i class="bi bi-calendar3 me-1"></i>
-                <span th:text="${n.created_at != null ? #temporals.format(n.created_at, 'dd MMM yyyy, hh:mm a') : 'Recently Added'}">
-                  12 Oct 2026, 04:30 PM
-                </span>
-              </span>
-            </div>
-            <div class="p-3 bg-light rounded-3 text-dark text-break border" style="font-size: 0.925rem; line-height: 1.6;" th:text="${n.note_text}">
-              Internal progress note content.
-            </div>
-          </div>
-        </div>
-        <div th:if="${#lists.isEmpty(ticket.notes)}" class="text-muted small py-4 text-center">
-          <i class="bi bi-chat-left-dots fs-3 d-block text-secondary mb-2"></i>
-          No activity notes recorded yet.
-        </div>
-      </div>
     </div>
 
-    <!-- Update Action Form Column -->
-    <div class="col-12 col-lg-5">
-      <div class="card-surface p-4 sticky-top" style="top: 24px;">
-        <h2 class="h6 fw-bold text-uppercase text-secondary mb-3" style="font-size: 0.75rem; letter-spacing: 0.05em;">
-          <i class="bi bi-sliders me-1"></i> Update Ticket Status
-        </h2>
+    <div class="row g-3">
+        <div class="col-lg-8">
+            <section class="card-surface card-body-pad mb-3">
+                <h2 class="section-title">Description</h2>
+                <p class="body-text" th:text="${ticket.description}">Description</p>
+            </section>
 
-        <form th:action="@{'/tickets/' + ${ticket.ticket_id} + '/update'}" th:object="${updateRequest}" method="post">
-          <input type="hidden" th:field="*{version}" />
+            <section class="card-surface card-body-pad">
+                <h2 class="section-title">Activity</h2>
+                <div th:each="n : ${ticket.notes}" class="note">
+                    <div class="note-meta">
+                        <span class="note-author" th:text="${n.author_name}">Support Agent</span>
+                        <span class="note-time" th:text="${#temporals.format(n.created_at, 'dd MMM yyyy, hh:mm a')}">Time</span>
+                    </div>
+                    <p class="body-text" th:text="${n.note_text}">Note</p>
+                </div>
+                <p th:if="${#lists.isEmpty(ticket.notes)}" class="text-muted small mb-0">No notes yet.</p>
+            </section>
+        </div>
 
-          <div class="mb-3">
-            <label for="status" class="form-label small fw-semibold text-secondary">Status Lifecycle</label>
-            <select id="status" th:field="*{status}" class="form-select">
-              <option value="OPEN" th:selected="${ticket.status != null and ticket.status.name() == 'OPEN'}">Open</option>
-              <option value="IN_PROGRESS" th:selected="${ticket.status != null and ticket.status.name() == 'IN_PROGRESS'}">In Progress</option>
-              <option value="CLOSED" th:selected="${ticket.status != null and ticket.status.name() == 'CLOSED'}">Closed (Resolved)</option>
-            </select>
-          </div>
+        <div class="col-lg-4">
+            <section class="card-surface card-body-pad mb-3" th:unless="${canEdit}">
+                <h2 class="section-title">Being handled</h2>
+                <p class="mb-0">This ticket is being handled by <strong th:text="${ticket.assigned_agent_name}">Agent</strong>. Only they or an admin can update it.</p>
+            </section>
 
-          <div class="mb-4">
-            <label for="notes" class="form-label small fw-semibold text-secondary">Internal Progress Note</label>
-            <textarea id="notes" rows="4" th:field="*{notes}" class="form-control"
-                      placeholder="Log troubleshooting findings or resolution summary..."></textarea>
-          </div>
+            <section class="card-surface card-body-pad mb-3" th:if="${canEdit}">
+                <h2 class="section-title">Update ticket</h2>
+                <form th:action="@{'/tickets/' + ${ticket.ticket_id} + '/update'}" th:object="${updateRequest}" method="post">
+                    <input type="hidden" th:field="*{version}">
+                    <div class="mb-3">
+                        <label for="status" class="form-label">Status</label>
+                        <select th:field="*{status}" class="form-select">
+                            <option value="OPEN" th:selected="${ticket.status.name() == 'OPEN'}">Open</option>
+                            <option value="IN_PROGRESS" th:selected="${ticket.status.name() == 'IN_PROGRESS'}">In progress</option>
+                            <option th:if="${ticket.status.name() == 'RESOLVED'}" value="RESOLVED" selected>Resolved</option>
+                            <option value="CLOSED" th:selected="${ticket.status.name() == 'CLOSED'}">Closed</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="notes" class="form-label">Progress note (the customer can read this)</label>
+                        <textarea rows="4" th:field="*{notes}" class="form-control" maxlength="5000"
+                                  placeholder="What did you find or do?"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Save changes</button>
+                </form>
+            </section>
 
-          <button type="submit" class="btn btn-primary w-100 rounded-pill fw-semibold py-2.5 shadow-sm">
-            <i class="bi bi-save me-1"></i> Save Changes
-          </button>
-        </form>
-      </div>
+            <section class="card-surface card-body-pad">
+                <h2 class="section-title">Customer</h2>
+                <div class="mb-3">
+                    <div class="detail-label">Name</div>
+                    <div class="detail-value" th:text="${ticket.customer_name}">Name</div>
+                </div>
+                <div>
+                    <div class="detail-label">Email</div>
+                    <div class="detail-value"><a th:href="'mailto:' + ${ticket.customer_email}" th:text="${ticket.customer_email}">email</a></div>
+                </div>
+            </section>
+        </div>
     </div>
-  </div>
-</div>
+</main>
 
-<!-- Interactive Toast System -->
-<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1080;" th:if="${toastMessage}">
-  <div id="liveToast" class="toast align-items-center text-white bg-dark border-0 shadow-lg rounded-3" role="alert" aria-live="assertive" aria-atomic="true">
-    <div class="d-flex">
-      <div class="toast-body d-flex align-items-center gap-2 py-3 px-3">
-        <i th:if="${toastType != 'danger'}" class="bi bi-check-circle-fill text-success fs-5"></i>
-        <i th:if="${toastType == 'danger'}" class="bi bi-exclamation-octagon-fill text-danger fs-5"></i>
-        <span class="fw-medium small" th:text="${toastMessage}">Action completed successfully!</span>
-      </div>
-      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-    </div>
-  </div>
-</div>
+<div th:replace="~{fragments/layout :: toast(${toastMessage}, ${toastType})}"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-<script th:if="${toastMessage}">
-  document.addEventListener('DOMContentLoaded', () => {
-    const toastElem = document.getElementById('liveToast');
-    if (toastElem) {
-      const toast = new bootstrap.Toast(toastElem, { delay: 4500 });
-      toast.show();
-    }
-  });
-</script>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
 </body>
 </html>

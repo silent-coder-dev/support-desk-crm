@@ -1,152 +1,71 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>All Tickets Registry | Admin</title>
-    <!-- Blue Shield Tab Favicon -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%230d6efd'%3E%3Cpath d='M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z'/%3E%3C/svg%3E">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; color: #1e293b; min-height: 100vh; }
-        .navbar-bright { background-color: #ffffff; border-bottom: 1px solid #e2e8f0; }
-        .card-surface { background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04); }
-        .table-bright thead { background-color: #f1f5f9; color: #475569; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
-        .table-bright td, .table-bright th { padding: 0.95rem 1.15rem; border-bottom-color: #f1f5f9; }
-        .table tbody tr:hover { background-color: #f8fafc; }
-        .badge-pill-custom {
-            padding: 0.35rem 0.65rem;
-            font-size: 0.725rem;
-            font-weight: 600;
-            border-radius: 9999px;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.35rem;
-        }
-    </style>
-</head>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{fragments/layout :: head('All tickets')}"></head>
 <body>
 
-<nav class="navbar-bright py-3">
-    <div class="container-fluid px-4 d-flex justify-content-between align-items-center">
-        <a th:href="@{/admin/dashboard}" class="text-primary text-decoration-none fw-semibold d-flex align-items-center gap-2">
-            <i class="bi bi-arrow-left"></i> Return to Admin Dashboard
-        </a>
-        <div class="d-flex align-items-center gap-2">
-            <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 rounded-pill fw-semibold">
-                Full Inquiries Registry
-            </span>
-            <a th:href="@{/logout}" class="btn btn-outline-danger btn-sm rounded-pill px-3 fw-semibold">
-                <i class="bi bi-box-arrow-right me-1"></i> Logout
-            </a>
+<nav th:replace="~{fragments/layout :: appNav('registry')}"></nav>
+
+<main class="container page">
+    <a th:href="@{/admin/dashboard}" class="back-link"><i class="bi bi-arrow-left" aria-hidden="true"></i>Dashboard</a>
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">All tickets</h1>
+            <p class="page-subtitle"><span th:text="${tickets.size() == 1 ? '1 ticket' : tickets.size() + ' tickets'}">0 tickets</span>, newest first</p>
         </div>
     </div>
-</nav>
 
-<div class="container-fluid px-4 my-4">
-    <!-- Filter Bar -->
-    <div class="card-surface p-3 mb-4">
-        <form method="get" th:action="@{/tickets/admin/all-tickets}" class="row g-2 align-items-center">
-            <div class="col-12 col-md-5">
-                <div class="input-group">
-                    <span class="input-group-text bg-white border-end-0 text-muted ps-3"><i class="bi bi-search"></i></span>
-                    <input type="text" name="search" class="form-control border-start-0 ps-1"
-                           placeholder="Search by customer name, subject, or ID..." th:value="${searchQuery}" autocomplete="off" />
-                </div>
-            </div>
-            <div class="col-7 col-md-3">
-                <select name="status" class="form-select">
-                    <option value="">All Statuses</option>
-                    <option value="OPEN" th:selected="${selectedStatus != null and selectedStatus.name() == 'OPEN'}">Open</option>
-                    <option value="IN_PROGRESS" th:selected="${selectedStatus != null and selectedStatus.name() == 'IN_PROGRESS'}">In Progress</option>
-                    <option value="CLOSED" th:selected="${selectedStatus != null and selectedStatus.name() == 'CLOSED'}">Closed (Resolved)</option>
-                </select>
-            </div>
-            <div class="col-5 col-md-2">
-                <button type="submit" class="btn btn-primary w-100 fw-bold">Filter</button>
-            </div>
-            <div class="col-12 col-md-2" th:if="${searchQuery != null or selectedStatus != null}">
-                <a th:href="@{/tickets/admin/all-tickets}" class="btn btn-outline-danger w-100">Reset</a>
-            </div>
-        </form>
-    </div>
-
-    <!-- Data Table Card -->
     <div class="card-surface overflow-hidden">
+        <div class="toolbar">
+            <form method="get" th:action="@{/admin/tickets}" class="toolbar-form">
+                <div class="toolbar-search">
+                    <i class="bi bi-search" aria-hidden="true"></i>
+                    <input type="search" name="search" class="form-control" placeholder="Search customer, ID, or subject"
+                           aria-label="Search tickets" th:value="${searchQuery}" autocomplete="off">
+                </div>
+                <select name="status" class="form-select" aria-label="Filter by status" onchange="this.form.submit()">
+                    <option value="">All statuses</option>
+                    <option value="OPEN" th:selected="${selectedStatus != null and selectedStatus.name() == 'OPEN'}">Open</option>
+                    <option value="IN_PROGRESS" th:selected="${selectedStatus != null and selectedStatus.name() == 'IN_PROGRESS'}">In progress</option>
+                    <option value="CLOSED" th:selected="${selectedStatus != null and selectedStatus.name() == 'CLOSED'}">Closed</option>
+                </select>
+                <a th:if="${searchQuery != null or selectedStatus != null}" th:href="@{/admin/tickets}" class="btn btn-quiet">Reset</a>
+            </form>
+        </div>
+
         <div class="table-responsive">
-            <table class="table table-bright align-middle mb-0">
+            <table class="data-table">
                 <thead>
                 <tr>
-                    <th>Ticket ID</th>
-                    <th>Customer</th>
+                    <th>Ticket</th>
+                    <th class="d-none d-sm-table-cell">Customer</th>
                     <th>Subject</th>
                     <th>Status</th>
-                    <th>Assigned Agent</th>
-                    <th>Logged At</th>
-                    <th class="text-end">Inspect</th>
+                    <th class="d-none d-md-table-cell">Assigned to</th>
+                    <th class="d-none d-lg-table-cell">Created</th>
                 </tr>
                 </thead>
                 <tbody>
                 <tr th:each="t : ${tickets}">
-                    <td>
-                        <span class="badge bg-light text-primary border font-monospace px-2.5 py-1.5" th:text="${t.ticket_id}">TKT-001</span>
-                    </td>
-                    <td class="fw-bold text-dark" th:text="${t.customer_name}">Customer</td>
-                    <td class="text-muted text-truncate" style="max-width: 280px;" th:text="${t.subject}">Subject</td>
-                    <td>
-                        <span class="badge rounded-pill px-2.5 py-1.5"
-                              th:classappend="${t.status.name() == 'OPEN' ? 'bg-info-subtle text-info border border-info-subtle' : (t.status.name() == 'IN_PROGRESS' ? 'bg-warning-subtle text-warning border border-warning-subtle' : 'bg-success-subtle text-success border border-success-subtle')}"
-                              th:text="${t.status}">OPEN</span>
-                    </td>
-                    <td>
-                        <span th:if="${t.assigned_agent_name != null}" class="badge bg-light text-dark border">
-                            <i class="bi bi-person me-1"></i><span th:text="${t.assigned_agent_name}">Agent</span>
-                        </span>
-                        <span th:if="${t.assigned_agent_name == null}" class="text-muted small fst-italic">Unassigned</span>
-                    </td>
-                    <td class="text-muted small" th:text="${#temporals.format(t.created_at, 'dd MMM yyyy, hh:mm a')}">Date</td>
-                    <td class="text-end">
-                        <a th:href="@{'/admin/tickets/' + ${t.ticket_id}}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
-                            Inspect <i class="bi bi-chevron-right ms-1"></i>
-                        </a>
-                    </td>
-                </tr>
-
-                <!-- Empty State Row -->
-                <tr th:if="${#lists.isEmpty(tickets)}">
-                    <td colspan="7" class="text-center py-5 text-muted">
-                        <i class="bi bi-inbox fs-1 d-block mb-2 text-secondary"></i>
-                        <div class="fw-semibold">No support tickets found</div>
-                        <div class="small">Try adjusting your filters or search keywords.</div>
-                    </td>
+                    <td><a th:href="@{'/admin/tickets/' + ${t.ticket_id}}" class="ticket-id" th:text="${t.ticket_id}">TKT-001</a></td>
+                    <td class="cell-strong text-nowrap d-none d-sm-table-cell" th:text="${t.customer_name}">Customer</td>
+                    <td class="cell-truncate" th:text="${t.subject}">Subject</td>
+                    <td><span th:replace="~{fragments/layout :: status(${t.status})}"></span></td>
+                    <td class="text-nowrap d-none d-md-table-cell" th:classappend="${t.assigned_agent_name == null} ? 'text-muted'" th:text="${t.assigned_agent_name != null ? t.assigned_agent_name : 'Unassigned'}">Agent</td>
+                    <td class="text-muted text-nowrap d-none d-lg-table-cell" th:text="${#temporals.format(t.created_at, 'dd MMM yyyy, hh:mm a')}">Date</td>
                 </tr>
                 </tbody>
             </table>
         </div>
-    </div>
-</div>
-
-<!-- Interactive Toast Container -->
-<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1080;" th:if="${toastMessage}">
-    <div id="liveToast" class="toast align-items-center text-white bg-dark border-0 shadow-lg rounded-3" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="d-flex">
-            <div class="toast-body d-flex align-items-center gap-2 py-3 px-3">
-                <i class="bi bi-check-circle-fill text-success fs-5"></i>
-                <span class="fw-medium small" th:text="${toastMessage}">Action completed successfully!</span>
-            </div>
-            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        <div th:if="${#lists.isEmpty(tickets)}" class="empty-state">
+            <i class="bi bi-inbox" aria-hidden="true"></i>
+            No tickets found. Try a different search or filter.
+        </div>
+        <div class="list-note" th:if="${tickets.size() >= ticketLimit}">
+            Showing the newest <span th:text="${ticketLimit}">500</span> tickets. Use search to find older ones.
         </div>
     </div>
-</div>
+</main>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script th:if="${toastMessage}">
-    document.addEventListener('DOMContentLoaded', () => {
-        const toastEl = document.getElementById('liveToast');
-        if (toastEl) new bootstrap.Toast(toastEl, { delay: 4000 }).show();
-    });
-</script>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
 </body>
 </html>

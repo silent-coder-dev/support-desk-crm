@@ -1,337 +1,196 @@
 # 🛡️ SupportDesk CRM
 
-### Enterprise Customer Ingestion, Concurrency Shield & Automated Notification Engine
+### Customer Ticketing with Collision Protection, Live Queues and Automatic Email Updates
 
-[![Java 21](https://img.shields.io/badge/Java-21%20LTS-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)](https://www.oracle.com/java/)
-[![Spring Boot 3](https://img.shields.io/badge/Spring_Boot-3.3+-6DB33F?style=for-the-badge&logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
+[![Java 21](https://img.shields.io/badge/Java-21%20LTS-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)](https://openjdk.org/)
+[![Spring Boot 4](https://img.shields.io/badge/Spring_Boot-4.1-6DB33F?style=for-the-badge&logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
 [![MySQL 8.0](https://img.shields.io/badge/MySQL-8.0-4479A1?style=for-the-badge&logo=mysql&logoColor=white)](https://www.mysql.com/)
 [![Docker](https://img.shields.io/badge/Docker-Multi--Stage-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
-[![Gmail SMTP](https://img.shields.io/badge/Gmail-SMTP%20TLS-EA4335?style=for-the-badge&logo=gmail&logoColor=white)](https://mail.google.com/)
 [![Bootstrap 5.3](https://img.shields.io/badge/Bootstrap-5.3-7952B3?style=for-the-badge&logo=bootstrap&logoColor=white)](https://getbootstrap.com/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
-<div align="center">
-  <p>
-    <b>A production-grade, multi-threaded customer service CRM built to eliminate agent write collisions, prevent database spam, and dispatch automated lifecycle email notifications. Built by silent_coder.</b>
-  </p>
+Customers raise and track support requests without an account. Agents work from a live queue that protects them from overwriting each other. Admins see workload and activity at a glance. Built by silent_coder.
 
-  <p>
-    <a href="#-1-evolution-tracker-what-why--how">Evolution Tracker</a> • 
-    <a href="#-2-database-migration-journey-sqlite--mysql-80">Database Migration</a> • 
-    <a href="#-3-concurrency-shield-optimistic-locking">Concurrency Shield</a> • 
-    <a href="#-4-automated-email-notification-engine">Email Engine</a> • 
-    <a href="#-5-rest-api-reference">REST APIs</a> • 
-    <a href="#-6-docker--render-cloud-deployment">Deployment</a> • 
-    <a href="#-7-local-installation--setup">Setup</a> • 
-    <a href="#-live-application--endpoints">Live Endpoints</a>
-  </p>
-</div>
+## Documentation
 
----
+| Document | What's in it |
+|---|---|
+| [doc/problem.md](doc/problem.md) | The problem, how it was tackled, the solution, and known limits |
+| [doc/techstack.md](doc/techstack.md) | Every technology and why it was chosen |
+| [doc/design.md](doc/design.md) | Fonts, colors, components and pages |
+| [doc/interview.md](doc/interview.md) | Every concept and method explained in Hinglish |
 
-## 📊 1. Evolution Tracker: What, Why & How
+## Features
 
-<table>
-  <thead>
-    <tr>
-      <th align="left">Dimension / Component</th>
-      <th align="left">Initial Prototype</th>
-      <th align="left">Production Upgrade</th>
-      <th align="left">Architectural Rationale</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><b>Java Platform</b></td>
-      <td>Java 17</td>
-      <td><b>OpenJDK 21 (LTS)</b></td>
-      <td>Performance improvements, modern runtime efficiency, and container resource management.</td>
-    </tr>
-    <tr>
-      <td><b>Framework</b></td>
-      <td>Spring Boot 2.x / 3.0</td>
-      <td><b>Spring Boot 3.3+</b></td>
-      <td>Native Jakarta EE 10 baseline, robust security filters, and optimized bean lifecycle management.</td>
-    </tr>
-    <tr>
-      <td><b>Persistence Store</b></td>
-      <td>SQLite 3 (<code>crm.db</code>)</td>
-      <td><b>MySQL 8.0 (InnoDB)</b></td>
-      <td>SQLite single-file write locking caused <code>Hikari Connection Timeout</code> under concurrency. MySQL delivers row-level locking and enterprise concurrency.</td>
-    </tr>
-    <tr>
-      <td><b>Dialect Engine</b></td>
-      <td>Community SQLite Dialect</td>
-      <td><b>Hibernate MySQLDialect</b></td>
-      <td>Eliminated <code>Cannot add UNIQUE column</code> limitations and auto-increment identifier mismatches.</td>
-    </tr>
-    <tr>
-      <td><b>ID Generation</b></td>
-      <td>Implicit SQLite RowID</td>
-      <td><b><code>GenerationType.IDENTITY</code></b></td>
-      <td>Guarantees multi-table relational integrity and auto-increment identity without sequence lock contention.</td>
-    </tr>
-    <tr>
-      <td><b>Live Queue Sync</b></td>
-      <td>Manual Page Refresh</td>
-      <td><b>Server-Sent Events (SSE)</b></td>
-      <td>Instant queue status synchronization, agent auto-claim indicators, and SLA updates without client polling.</td>
-    </tr>
-    <tr>
-      <td><b>Lifecycle Notifications</b></td>
-      <td>Silent Database Writes</td>
-      <td><b>Automated Gmail SMTP Engine</b></td>
-      <td>Delivers instant reference tracking URLs and resolution notices directly to the customer's inbox.</td>
-    </tr>
-    <tr>
-      <td><b>Environment Configs</b></td>
-      <td>Hardcoded properties</td>
-      <td><b>12-Factor Variables (<code>DB_*</code>, <code>MAIL_*</code>)</b></td>
-      <td>Protects production credentials from git history; enables dynamic container runtime injection on Render/AWS.</td>
-    </tr>
-    <tr>
-      <td><b>Deployment Target</b></td>
-      <td>Local host execution</td>
-      <td><b>Multi-Stage Alpine Docker</b></td>
-      <td>Mitigates ephemeral cloud filesystem loss and enforces consistent <code>Asia/Kolkata</code> timezone operations.</td>
-    </tr>
-  </tbody>
-</table>
+- **No-login customer portal:** submit a request and get a reference like `TKT-001`.
+- **Private tracking:** progress is visible only with the reference and the email on the ticket.
+- **Duplicate detection:** a repeat submission returns the same ticket, and new details become a follow-up note.
+- **One person per ticket:** once a staff member is handling a ticket, others can only read it. If two people save at the same moment, the later save is rejected.
+- **Abuse protection:** the public form limits repeat requests by IP, email and text, and stops bots with a hidden field.
+- **Live queue:** agents' screens update by themselves through Server-Sent Events.
+- **Automatic emails:** customers are emailed when a ticket is created, updated and resolved. Emails never say who changed it or what they wrote.
+- **Staff management:** admins add agents and other admins, disable accounts, and reset passwords.
+- **Admin dashboard:** key numbers, new vs resolved over 14 days, average time to resolve, the tickets waiting longest, agent workload, and an audit trail.
 
----
+## Quick start
 
-## 🗄️ 2. Database Migration Journey (SQLite ➔ MySQL 8.0)
+**You need:** Java 21 and MySQL 8.
 
-### Problem Architecture (Why SQLite Broke Under Load)
+**1. Create the database:**
 
-```text
-               [ Client HTTP Traffic ]
-                          │
-                          ▼
-            [ Tomcat Worker Thread Pool ]
-                          │
-         ┌────────────────┴────────────────┐
-         ▼                                 ▼
-[Thread A: Save Ticket]           [Thread B: Load User]
-         │                                 │
-         ▼                                 ▼
-    [Takes Write Lock]            [Waits for Database]
-         │                                 │
-         ▼                                 ▼
-🔒  [ SQLite Database File ] ◄─────────────┘ (Blocked!)
-         │
-         ▼ (Held > 3000ms)
-    💥 [ HikariPool Connection Timeout: HTTP 500 ]
+```sql
+CREATE DATABASE crm_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
 
-Issues Diagnosed & Solved
-HikariCP Connection Starvation: SQLite locks the entire database file during writes. When filter advices executed concurrent reads, HikariCP exhausted its 30-second lease timeout, crashing active sessions.
+**2. Set your settings** in PowerShell:
 
-DDL Column Alteration Lockout: Alterations adding email and mobile_number columns failed because SQLite does not natively support ALTER TABLE ADD COLUMN ... UNIQUE constraints on existing data sets.
-
-Ephemeral Cloud Storage Wipe: Container platforms such as Render refresh the local filesystem on sleep or redeployment, causing persistent data loss for embedded file databases.
-
-Comparative Resolution Matrix
-🛡️ 3. Concurrency Shield: Optimistic Locking
-The Concurrency Threat (Silent Write Overwrite)
-[Time: 10:00 AM] ──► Agent A loads TKT-001 (Version: 1)  ──────────────┐
-                                                                         │
-[Time: 10:01 AM] ──► Agent B loads TKT-001 (Version: 1)  ──────┐        │
-                                                               │        │
-[Time: 10:05 AM] ──► Agent A completes investigation:         │        │
-                     Status: CLOSED                            │        │
-                     Note: "Refund processed via gateway"      │        │
-                     Database Commits ─────────────────────────┼────────┘
-                     Status = CLOSED | Version = 2             │
-                                                               │
-[Time: 10:08 AM] ──► Agent B finishes typing (late):          │
-                     Status: IN_PROGRESS                       │
-                     Note: "Contacted bank partner"            │
-                     Attempting Save ──────────────────────────┘
-                               │
-            ┌──────────────────┴──────────────────┐
-            ▼                                     ▼
-   WITHOUT Concurrency Shield            WITH Concurrency Shield
-   ──────────────────────────            ───────────────────────
-   ❌ Agent A's work is erased!          🛡️ Version mismatch caught!
-   Status rewinds to IN_PROGRESS.        Write is blocked instantly.
-   Refund audit notes are lost.          Alert: "Conflict Detected".
-
-Technical Solution: JPA @Version
-@Entity
-@Table(name = "tickets")
-@Getter
-@Setter
-@NoArgsConstructor
-public class Ticket {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(name = "ticket_id", unique = true, nullable = false)
-    private String ticketId;
-
-    // Optimistic locking token to intercept write collisions
-    @Version
-    @Column(name = "version")
-    private Long version;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private TicketStatus status = TicketStatus.OPEN;
-
-    @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Note> notes = new ArrayList<>();
-}
-
-Concurrency Guard Lifecycle
-📧 4. Automated Email Notification Engine
-
-[Customer Ingestion Form] ──► [Ticket Generated: TKT-001] ──► [Receipt Email Dispatched]
-                                                                        │
-                                                                  (Agent Action)
-                                                                        ▼
-[Customer Inbox] ◄─── [Resolution Email Dispatched] ◄─── [Agent Closes Ticket]
-Dual-Stage Notification Pipeline
-Dynamic 12-Factor Configuration (application.properties)
-Properties
-# Base URL for dynamic notification hyperlinks (Externalized for Cloud Deployments)
-app.base-url=${APP_BASE_URL:http://localhost:8080}
-
-# Gmail SMTP Gateway
-spring.mail.host=smtp.gmail.com
-spring.mail.port=587
-spring.mail.username=${MAIL_USERNAME}
-spring.mail.password=${MAIL_PASSWORD}
-spring.mail.properties.mail.smtp.auth=true
-spring.mail.properties.mail.smtp.starttls.enable=true
-spring.mail.properties.mail.smtp.connectiontimeout=5000
-spring.mail.properties.mail.smtp.timeout=5000
-📡 5. REST API Reference
-🐳 6. Docker & Render Cloud Deployment
-Dockerfile
-# Stage 1: Build JAR using Java 21
-FROM maven:3.9-eclipse-temurin-21 AS build
-WORKDIR /app
-
-COPY pom.xml .
-RUN mvn dependency:go-offline -B
-
-COPY src ./src
-RUN mvn clean package -DskipTests
-
-# Stage 2: Minimal runtime image
-FROM eclipse-temurin:21-jre-alpine
-WORKDIR /app
-
-RUN apk add --no-cache tzdata
-ENV TZ="Asia/Kolkata"
-
-COPY --from=build /app/target/*.jar app.jar
-
-EXPOSE 8080
-
-ENV JAVA_OPTS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -Duser.timezone=Asia/Kolkata"
-
-ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
-Deploying to Render Cloud
-
-💻 7. Local Installation & Setup
-
-# 1. Database Initialization
-# Run in MySQL: CREATE DATABASE crm_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
-# 2. Configure Local Environment Variables
+```powershell
 $env:DB_URL="jdbc:mysql://localhost:3306/crm_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true"
 $env:DB_USERNAME="root"
 $env:DB_PASSWORD="your_mysql_password"
-$env:MAIL_USERNAME="your-email@gmail.com"
-$env:MAIL_PASSWORD="your-16-character-app-password"
-$env:APP_BASE_URL="http://localhost:8080"
+$env:ADMIN_PASSWORD="choose_a_password"
+```
 
-# 3. Compile and Run Application
-.\mvnw clean package -DskipTests
-.\mvnw spring-boot:run
+**3. Run with the `dev` profile:**
 
-📂 8. Project Structure
+```powershell
+cd support-crm
+.\mvnw spring-boot:run "-Dspring-boot.run.profiles=dev"
+```
 
-support-desk-crm/
-├── Dockerfile                            # Production multi-stage Alpine container build
-├── pom.xml                               # Java 21, MySQL, Spring Mail, JPA dependencies
-├── src/main/java/com/support/crm/
-│   ├── config/                           # SecurityConfig, CustomAuthenticationSuccessHandler
-│   ├── controller/
-│   │   ├── AdminController.java          # Executive operations metrics & inspection
-│   │   ├── AuthController.java           # Agent signup & authenticated session routing
-│   │   ├── CustomerPortalController.java # Public intake & reference tracking
-│   │   ├── ProfileController.java        # Agent profile management & avatar uploads
-│   │   ├── TicketRestController.java     # REST endpoints with HTTP 409 conflict mapping
-│   │   └── TicketWebController.java      # Thymeleaf UI controller & SSE stream dispatcher
-│   ├── dto/                              # Request & response data transfer objects
-│   ├── model/
-│   │   ├── Note.java                     # Relational chronological timeline notes
-│   │   ├── Ticket.java                   # Core ticket entity with JPA @Version shield
-│   │   ├── TicketAuditLog.java           # Operational audit event logging
-│   │   ├── TicketStatus.java             # OPEN, IN_PROGRESS, RESOLVED, CLOSED
-│   │   └── User.java                     # Operator profile entity
-│   ├── repository/
-│   │   ├── NoteRepository.java           # Internal note persistence
-│   │   ├── TicketAuditLogRepository.java # Audit event queries
-│   │   ├── TicketRepository.java         # Dynamic JPQL queries & keyword filters
-│   │   └── UserRepository.java           # User entity data access
-│   └── service/
-│       ├── CustomUserDetailsService.java # Spring Security user details provider
-│       ├── NotificationService.java      # Real-time Gmail SMTP notification engine
-│       ├── SseNotificationService.java    # Multi-client live SSE event sync
-│       └── TicketService.java            # Deduplication, auto-claim & SLA lifecycle logic
-└── src/main/resources/
-    ├── application.properties            # 12-Factor externalized environment bindings
-    └── templates/                     
-        ├── auth/                         # Login & Agent registration templates
-        ├── landing.html                  # Motion-based landing page (by silent_coder)
-        ├── portal/                       # Public ticket intake & live tracking
-        ├── profile/                      # Operator profile & security controls
-        └── tickets/                      # Queue dashboard, ticket detail & admin console
+**4. Open** http://localhost:8080/admin-login and sign in as `admin` with the password from step 2. Customers use http://localhost:8080, and staff use http://localhost:8080/staff-login.
 
-🌐 Live Application
-Root Landing Portal
-https://support-desk-crm-qs00.onrender.com/
+> Without the `dev` profile, login over plain `http://` will fail, because production settings only send the session cookie over HTTPS.
 
-Customer Intake Portal
-https://support-desk-crm-qs00.onrender.com/portal/inquiry
+**Run the tests** (no MySQL needed):
 
-Live Ticket Tracking
-https://support-desk-crm-qs00.onrender.com/portal/track
+```powershell
+.\mvnw test
+```
 
-Operator Queue Console
-https://support-desk-crm-qs00.onrender.com/tickets
+## Configuration
 
-Create Ticket — Operator Console
-https://support-desk-crm-qs00.onrender.com/tickets/new
+The full list is in [.env.example](.env.example).
 
-Operator Profile & Settings
-https://support-desk-crm-qs00.onrender.com/profile
+| Variable | Required | Purpose |
+|---|---|---|
+| `DB_URL`, `DB_PASSWORD` | Yes | MySQL connection. The app won't start without them. |
+| `DB_USERNAME` | No | MySQL user. Defaults to `root`. |
+| `ADMIN_PASSWORD` | First run | Creates the `admin` login. Also replaces the old `admin123` password on an existing database. |
+| `APP_BASE_URL` | Production | Public address used for links in emails |
+| `BREVO_API_KEY`, `MAIL_FROM_EMAIL`, `MAIL_FROM_NAME` | For email | Brevo API key and a sender verified in Brevo. Uses Brevo's HTTP API, which works on Render's free plan. Without them, emails are skipped. |
+| `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` | For avatars | Photo uploads show an error without them |
+| `APP_SIGNUP_ENABLED` | No | Defaults to `false`. When `true`, **anyone** can register as an agent and read all customer tickets. |
+| `JPA_DDL_AUTO` | No | Hibernate schema mode. Defaults to `update`. |
 
-🔐 Authentication & Administration
-Operator Sign In
-https://support-desk-crm-qs00.onrender.com/login
+## Deploying
 
-Agent Enrolment / Sign Up
-https://support-desk-crm-qs00.onrender.com/signup
+The [Dockerfile](Dockerfile) builds from the repository root.
 
-Executive Admin Dashboard
-https://support-desk-crm-qs00.onrender.com/admin/dashboard
+```bash
+docker build -t support-desk-crm .
+docker run -p 8080:8080 --env-file .env support-desk-crm
+```
 
-Admin Full Ticket Registry
-https://support-desk-crm-qs00.onrender.com/admin/tickets
+**On Render:**
 
-Admin All Tickets — Fallback Alias
-https://support-desk-crm-qs00.onrender.com/tickets/admin/all-tickets
+1. Create a Web Service from this repository, using Docker.
+2. Add the variables above under **Environment**, including `ADMIN_PASSWORD` and `APP_BASE_URL`.
+3. Set the health check path to `/actuator/health`.
 
+The database must run outside the container, since a container's files don't survive a restart.
 
+## Who can do what
 
+| Action | Public | Agent | Admin |
+|---|---|---|---|
+| Submit a ticket, track own ticket | ✅ | ✅ | ✅ |
+| View the queue, update and claim tickets | | ✅ | ✅ |
+| Create tickets for a customer | | ✅ | ✅ |
+| Change own profile and password | | ✅ | ✅ |
+| Admin dashboard and full registry | | | ✅ |
+| Add, disable and reset staff | | | ✅ |
 
-🔑 System Roles & Access Matrix
-📄 License
-This software is distributed under the MIT License. Built with precision by silent_coder.
+**Adding staff:** an admin opens **Staff** in the sidebar and adds the person. The app creates a temporary password, shown once, for the admin to share privately. Admins can also disable an account, which signs the person out straight away, or reset a password.
+
+## REST API
+
+The API uses the same login session as the website. Write requests must also send the CSRF token from `GET /api/tickets/csrf`, in the `X-CSRF-TOKEN` header.
+
+| Method | Path | Purpose | Success | Errors |
+|---|---|---|---|---|
+| `POST` | `/api/tickets` | Create a ticket | 201 | 400 |
+| `GET` | `/api/tickets?status=OPEN&search=text` | List newest tickets | 200 | 400 |
+| `GET` | `/api/tickets/{id}` | Ticket with notes | 200 | 404 |
+| `PUT` | `/api/tickets/{id}` | Update status and notes. `version` is required. | 200 | 400, 404, 409 |
+| `POST` | `/api/tickets/{id}/claim` | Claim a ticket | 200 | 404, 409 |
+| `POST` | `/api/tickets/{id}/resolve` | Close a ticket | 200 | 404 |
+
+Without a login, the API returns 401. A `409` on `PUT` means someone else changed the ticket first, so reload it and try again.
+
+```json
+PUT /api/tickets/TKT-001
+{ "status": "IN_PROGRESS", "notes": "Looking into it", "version": 3 }
+```
+
+## Project structure
+
+```
+├── Dockerfile
+├── .env.example               All settings
+├── doc/                       Project documentation
+└── support-crm/
+    ├── pom.xml
+    └── src/
+        ├── main/
+        │   ├── java/com/support/crm/
+        │   │   ├── config/        Admin setup, Cloudinary
+        │   │   ├── controller/    Web pages, REST API, error handling
+        │   │   ├── dto/           Request and response objects
+        │   │   ├── exception/     Custom exceptions
+        │   │   ├── model/         Ticket, Note, User, TicketAuditLog
+        │   │   ├── repository/    Database queries
+        │   │   ├── security/      Login and access rules
+        │   │   └── service/       Business logic, email, live updates
+        │   ├── resources/
+        │   │   ├── templates/     Thymeleaf pages
+        │   │   ├── static/        Shared stylesheet and scripts
+        │   │   └── application*.properties
+        └── test/                  Automated tests
+```
+
+## Live application
+
+| Page | Link |
+|---|---|
+| Landing | https://support-desk-crm-qs00.onrender.com/ |
+| Submit a ticket | https://support-desk-crm-qs00.onrender.com/portal/inquiry |
+| Track a ticket | https://support-desk-crm-qs00.onrender.com/portal/track |
+| Staff sign in | https://support-desk-crm-qs00.onrender.com/staff-login |
+| Admin sign in | https://support-desk-crm-qs00.onrender.com/admin-login |
+
+## License
+
+Distributed under the MIT License. Built by silent_coder.
+
+## All endpoints
+
+| Who | Method | Path | Purpose |
+|---|---|---|---|
+| Customer | GET | `/` | Landing page |
+| Customer | GET, POST | `/portal/inquiry` | Submit a request |
+| Customer | GET, POST | `/portal/track` | Track with reference and email |
+| Admin | GET | `/admin-login` | Admin sign in |
+| Staff | GET | `/staff-login` | Staff sign in |
+| Both | POST | `/login` | Handles both sign-in forms |
+| Both | POST | `/logout` | Sign out |
+| Both | GET | `/profile` | Own profile |
+| Both | POST | `/profile/details`, `/profile/avatar`, `/profile/change-password` | Update own profile |
+| Staff, Admin | GET | `/tickets`, `/tickets/{id}`, `/tickets/live-stream` | Queue, ticket, live updates |
+| Staff, Admin | GET, POST | `/tickets/new` | Log a ticket for a customer |
+| Staff, Admin | POST | `/tickets/{id}/update`, `/tickets/{id}/claim`, `/tickets/{id}/resolve` | Work on a ticket |
+| Staff, Admin | GET, POST, PUT | `/api/tickets`, `/api/tickets/{id}`, `/api/tickets/{id}/claim`, `/api/tickets/{id}/resolve`, `/api/tickets/csrf` | REST API |
+| Admin | GET | `/admin/dashboard`, `/admin/tickets`, `/admin/tickets/{id}` | Dashboard and all tickets |
+| Admin | GET, POST | `/admin/staff`, `/admin/staff/new` | Staff list, add staff |
+| Admin | POST | `/admin/staff/{id}/disable`, `/enable`, `/reset-password` | Manage a staff account |
+| Anyone | GET | `/actuator/health` | Health check |

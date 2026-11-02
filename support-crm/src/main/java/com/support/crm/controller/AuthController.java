@@ -5,6 +5,7 @@ import com.support.crm.model.User;
 import com.support.crm.repository.UserRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -19,15 +20,45 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @RequiredArgsConstructor
 public class AuthController {
 
+    private static final String SIGNUP_CLOSED_REDIRECT = "redirect:/staff-login";
+    private static final String SIGNUP_CLOSED_MESSAGE = "Agent registration is closed. Please contact your administrator.";
+
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+    @Value("${app.signup.enabled:false}")
+    private boolean signupEnabled;
+
+    // Old links keep working
     @GetMapping("/login")
-    public String loginPage(@RequestParam(value = "error", required = false) String error,
-                            @RequestParam(value = "logout", required = false) String logout,
-                            Model model) {
+    public String oldLoginPage() {
+        return "redirect:/staff-login";
+    }
+
+    @GetMapping("/admin-login")
+    public String adminLoginPage(@RequestParam(value = "error", required = false) String error,
+                                 @RequestParam(value = "logout", required = false) String logout,
+                                 @RequestParam(value = "expired", required = false) String expired,
+                                 Model model) {
+        model.addAttribute("portal", "admin");
+        return loginPage(error, logout, expired, model);
+    }
+
+    @GetMapping("/staff-login")
+    public String staffLoginPage(@RequestParam(value = "error", required = false) String error,
+                                 @RequestParam(value = "logout", required = false) String logout,
+                                 @RequestParam(value = "expired", required = false) String expired,
+                                 Model model) {
+        model.addAttribute("portal", "staff");
+        return loginPage(error, logout, expired, model);
+    }
+
+    private String loginPage(String error, String logout, String expired, Model model) {
         if (error != null) {
             model.addAttribute("errorMessage", "Invalid username or password. Please try again.");
+        }
+        if (expired != null) {
+            model.addAttribute("logoutMessage", "You have been signed out. Please sign in again, or contact your administrator.");
         }
         if (logout != null) {
             model.addAttribute("logoutMessage", "You have been logged out securely.");
@@ -36,7 +67,11 @@ public class AuthController {
     }
 
     @GetMapping("/signup")
-    public String signupPage(Model model) {
+    public String signupPage(Model model, RedirectAttributes redirectAttributes) {
+        if (!signupEnabled) {
+            redirectAttributes.addFlashAttribute("errorMessage", SIGNUP_CLOSED_MESSAGE);
+            return SIGNUP_CLOSED_REDIRECT;
+        }
         if (!model.containsAttribute("registerRequest")) {
             model.addAttribute("registerRequest", new RegisterRequest());
         }
@@ -47,6 +82,13 @@ public class AuthController {
     public String processSignup(@Valid @ModelAttribute("registerRequest") RegisterRequest request,
                                 BindingResult result,
                                 RedirectAttributes redirectAttributes) {
+        if (!signupEnabled) {
+            redirectAttributes.addFlashAttribute("errorMessage", SIGNUP_CLOSED_MESSAGE);
+            return SIGNUP_CLOSED_REDIRECT;
+        }
+        if (result.hasErrors()) {
+            return "auth/signup";
+        }
 
         String cleanedUsername = request.getUsername().trim().toLowerCase();
         String cleanedEmail = request.getEmail().trim().toLowerCase();
@@ -74,13 +116,13 @@ public class AuthController {
                 .username(cleanedUsername)
                 .email(cleanedEmail)
                 .mobileNumber(cleanedMobile)
-                .password(passwordEncoder.encode(request.getPassword().trim()))
+                .password(passwordEncoder.encode(request.getPassword()))
                 .role("ROLE_AGENT")
                 .build();
 
         userRepository.save(newAgent);
 
         redirectAttributes.addFlashAttribute("successMessage", "Agent account created successfully! Please login.");
-        return "redirect:/login";
+        return "redirect:/staff-login";
     }
 }

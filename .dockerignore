@@ -1,0 +1,4 @@
+# Only support-crm/pom.xml and support-crm/src are needed to build the image
+**
+!support-crm/pom.xml
+!support-crm/src

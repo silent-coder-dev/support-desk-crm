@@ -21,6 +21,8 @@ public class TicketDetailResponse {
     private String description;
     private TicketStatus status;
     private Long version;
+    private Long assigned_agent_id;
+    private String assigned_agent_name;
     private List<NoteDto> notes;
 
     @Getter

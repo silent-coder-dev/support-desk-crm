@@ -1,2 +1,19 @@
+# Build output
+target/
 
-crm.db
+# Secrets
+.env
+
+# Local data
+*.db
+uploads/
+
+# IDE and editor files
+.idea/
+.metadata/
+.vscode/
+support-crm/bin/
+
+# Private working notes for Claude Code
+CLAUDE.md
+claude.md

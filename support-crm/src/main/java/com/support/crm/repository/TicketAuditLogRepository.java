@@ -7,9 +7,9 @@ import java.util.List;
 
 public interface TicketAuditLogRepository extends JpaRepository<TicketAuditLog , Long> {
 
-    // Dashboard par dikhane ke liye: Sabse latest 20 activities (newest first)
-    List<TicketAuditLog> findTop20ByOrderByTimestampDesc();
+    // Dashboard par dikhane ke liye: Sabse latest 8 activities (newest first)
+    List<TicketAuditLog> findTop8ByOrderByTimestampDesc();
 
-    // Kisi particular ticket ki poori history dekhne ke liye
-    List<TicketAuditLog> findByTicketIdOrderByTimestampDesc(String ticketId);
+    // Profile page par dikhane ke liye: Is user ki latest 5 activities
+    List<TicketAuditLog> findTop5ByUserIdOrderByTimestampDesc(Long userId);
 }

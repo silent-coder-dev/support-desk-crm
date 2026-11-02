@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{fragments/layout :: head('Staff')}"></head>
+<body>
+
+<nav th:replace="~{fragments/layout :: appNav('staff')}"></nav>
+
+<main class="container page">
+    <a th:href="@{/admin/dashboard}" class="back-link"><i class="bi bi-arrow-left" aria-hidden="true"></i>Dashboard</a>
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">Staff</h1>
+            <p class="page-subtitle">Everyone who can sign in. Agents can view and update all customer tickets.</p>
+        </div>
+        <a th:href="@{/admin/staff/new}" class="btn btn-primary"><i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Add staff</a>
+    </div>
+
+    <!-- Shown once, straight after adding someone or resetting their password -->
+    <section th:if="${newStaffPassword}" class="card-surface secret-card" role="status">
+        <h2 class="section-title mb-1">Temporary password for <span th:text="${newStaffName}">Name</span></h2>
+        <div class="small">Username: <span class="mono" th:text="${newStaffUsername}">username</span></div>
+        <div class="secret-value">
+            <code id="temporaryPassword" th:text="${newStaffPassword}">password</code>
+            <button type="button" class="btn btn-outline btn-sm" id="copyPassword">Copy</button>
+        </div>
+        <div class="small">Share it privately. It won't be shown again. They should change it from their profile after signing in.</div>
+    </section>
+
+    <div class="card-surface overflow-hidden">
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th class="d-none d-xl-table-cell">Email</th>
+                    <th class="d-none d-md-table-cell">Active tickets</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="member : ${staff}" th:classappend="${member.disabled} ? 'row-disabled'"
+                    th:with="isYou=${currentUser != null and member.id == currentUser.id}">
+                    <td>
+                        <div class="person">
+                            <img th:if="${member.avatarUrl != null}" th:src="${member.avatarUrl}" class="avatar" alt="">
+                            <span th:if="${member.avatarUrl == null}" class="avatar"><i class="bi bi-person-fill" aria-hidden="true"></i></span>
+                            <div>
+                                <div class="person-name">
+                                    <span th:text="${member.fullname}">Name</span>
+                                    <span th:if="${isYou}" class="person-handle">(you)</span>
+                                    <span th:if="${member.disabled}" class="tag tag-off">Disabled</span>
+                                    <span th:unless="${member.disabled}" class="tag" th:classappend="${#strings.endsWith(member.role, 'ADMIN')} ? 'tag-admin'"
+                                          th:text="${#strings.endsWith(member.role, 'ADMIN') ? 'Admin' : 'Agent'}">Agent</span>
+                                </div>
+                                <div class="person-handle mono" th:text="${member.username}">username</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="d-none d-xl-table-cell" th:text="${member.email != null ? member.email : 'Not set'}">email</td>
+                    <td class="d-none d-md-table-cell" th:text="${activeTickets[member.id] ?: 0}">0</td>
+                    <td>
+                        <div class="row-actions" th:unless="${isYou}">
+                            <form th:action="@{'/admin/staff/' + ${member.id} + '/reset-password'}" method="post"
+                                  th:attr="onsubmit=|return confirm('Reset this person\'s password? They will be signed out.')|">
+                                <button type="submit" class="btn btn-quiet btn-sm">Reset password</button>
+                            </form>
+                            <form th:if="${!member.disabled}" th:action="@{'/admin/staff/' + ${member.id} + '/disable'}" method="post"
+                                  th:attr="onsubmit=|return confirm('Disable this account? They will be signed out straight away. Their active tickets stay assigned to them.')|">
+                                <button type="submit" class="btn btn-quiet btn-sm">Disable</button>
+                            </form>
+                            <form th:if="${member.disabled}" th:action="@{'/admin/staff/' + ${member.id} + '/enable'}" method="post">
+                                <button type="submit" class="btn btn-quiet btn-sm">Enable</button>
+                            </form>
+                        </div>
+                        <div class="row-actions" th:if="${isYou}"><a th:href="@{/profile}" class="btn btn-quiet btn-sm">Your profile</a></div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<div th:replace="~{fragments/layout :: toast(${toastMessage}, ${toastType})}"></div>
+
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+<script>
+    const copyButton = document.getElementById('copyPassword');
+    if (copyButton) {
+        copyButton.addEventListener('click', async () => {
+            await navigator.clipboard.writeText(document.getElementById('temporaryPassword').textContent);
+            copyButton.textContent = 'Copied';
+        });
+    }
+</script>
+</body>
+</html>

@@ -1,268 +1,158 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Operator Profile | SupportDesk CRM</title>
-    <!-- Blue Shield Tab Logo -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%230d6efd'%3E%3Cpath d='M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z'/%3E%3C/svg%3E">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; color: #0f172a; min-height: 100vh; }
-        .navbar-custom { background-color: #0f172a; border-bottom: 1px solid #1e293b; }
-        .card-surface { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04); }
-        .avatar-circle { width: 96px; height: 96px; border-radius: 50%; object-fit: cover; border: 3px solid #ffffff; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .avatar-placeholder { width: 96px; height: 96px; border-radius: 50%; background-color: #eff6ff; color: #2563eb; display: inline-flex; align-items: center; justify-content: center; font-size: 2.5rem; border: 3px solid #ffffff; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .nav-tabs .nav-link { color: #64748b; font-weight: 600; font-size: 0.9rem; border: none; border-bottom: 2px solid transparent; padding: 0.75rem 1.25rem; }
-        .nav-tabs .nav-link.active { color: #2563eb; border-bottom: 2px solid #2563eb; background: transparent; }
-    </style>
-</head>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{fragments/layout :: head('Your profile')}"></head>
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-dark navbar-custom py-3">
-    <div class="container">
-        <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="/tickets">
-            <span class="bg-primary text-white p-2 rounded-3 d-inline-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
-                <i class="bi bi-shield-check"></i>
-            </span>
-            <span>SupportDesk <span class="badge bg-secondary-subtle text-light-emphasis small fw-normal ms-1">CRM</span></span>
-        </a>
-        <div class="d-flex align-items-center gap-2">
-            <a href="/tickets" class="btn btn-outline-light btn-sm px-3 rounded-pill fw-semibold">
-                <i class="bi bi-arrow-left me-1"></i> Dashboard
-            </a>
-            <a href="/logout" class="btn btn-outline-danger btn-sm px-3 rounded-pill fw-semibold">
-                <i class="bi bi-box-arrow-right me-1"></i> Logout
-            </a>
-        </div>
-    </div>
-</nav>
+<nav th:replace="~{fragments/layout :: appNav('profile')}"></nav>
 
-<div class="container my-4 my-md-5">
+<main class="container page" th:with="isAdmin=${#strings.endsWith(user.role, 'ADMIN')}">
+    <a th:href="@{${isAdmin ? '/admin/dashboard' : '/tickets'}}" class="back-link"><i class="bi bi-arrow-left" aria-hidden="true"></i>Back</a>
+    <h1 class="page-title mb-3">Your profile</h1>
 
-    <!-- Header Banner Profile Card -->
-    <div class="card-surface p-4 mb-4">
-        <div class="d-flex flex-column flex-md-row align-items-center justify-content-between gap-4">
-            <div class="d-flex flex-column flex-md-row align-items-center gap-3 text-center text-md-start">
-                <div class="position-relative">
-                    <img id="avatarDisplay" th:if="${user.avatarUrl != null}" th:src="${user.avatarUrl}" class="avatar-circle" alt="Operator Photo" />
-                    <div id="avatarFallback" th:if="${user.avatarUrl == null}" class="avatar-placeholder">
-                        <i class="bi bi-person"></i>
-                    </div>
-                </div>
-                <div>
-                    <div class="d-flex align-items-center justify-content-center justify-content-md-start gap-2 mb-1">
-                        <h1 class="h4 fw-bold text-dark mb-0" th:text="${user.fullname}">Satyam Singh</h1>
-                        <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2.5 py-1 small">
-                            <i class="bi bi-dot"></i> Active
-                        </span>
-                    </div>
-                    <div class="text-muted small d-flex flex-wrap align-items-center justify-content-center justify-content-md-start gap-3">
-                        <span><i class="bi bi-shield-lock me-1"></i> <span th:text="${user.role}">ROLE_ADMIN</span></span>
-                        <span><i class="bi bi-envelope me-1"></i> <span th:text="${user.email != null ? user.email : 'No email'}">agent@support.com</span></span>
-                        <span><i class="bi bi-person-badge me-1"></i> @<span th:text="${user.username}">username</span></span>
-                    </div>
+    <section class="card-surface mb-3">
+        <div class="profile-head">
+            <img th:if="${user.avatarUrl != null}" th:src="${user.avatarUrl}" id="avatarDisplay" class="avatar avatar-lg" alt="Your photo">
+            <span th:if="${user.avatarUrl == null}" id="avatarFallback" class="avatar avatar-lg"><i class="bi bi-person-fill" aria-hidden="true"></i></span>
+            <div class="me-auto">
+                <h2 class="profile-name" th:text="${user.fullname}">Name</h2>
+                <div class="profile-meta">
+                    <span class="tag" th:classappend="${isAdmin} ? 'tag-admin'" th:text="${isAdmin ? 'Administrator' : 'Support agent'}">Support agent</span>
+                    <span class="mono" th:text="${user.username}">username</span>
                 </div>
             </div>
-
-            <!-- Avatar Button -->
-            <div>
-                <button class="btn btn-outline-primary btn-sm rounded-pill px-3 fw-semibold shadow-sm"
-                        type="button"
-                        data-bs-toggle="collapse"
-                        data-bs-target="#changeAvatarSection"
-                        aria-expanded="false">
-                    <i class="bi bi-camera me-1"></i> Change Photo
-                </button>
-            </div>
+            <button class="btn btn-outline btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#changeAvatarSection"
+                    aria-expanded="false" aria-controls="changeAvatarSection">Change photo</button>
         </div>
-
-        <!-- Hidden Avatar Upload Panel -->
-        <div class="collapse mt-4 pt-3 border-top" id="changeAvatarSection">
-            <form th:action="@{/profile/avatar}" method="post" enctype="multipart/form-data" class="p-3 bg-light rounded-3 border" style="max-width: 500px;">
-                <label for="avatarFile" class="form-label small fw-semibold text-secondary mb-1">Select Local Image (JPG, PNG)</label>
-                <input type="file" id="avatarFile" name="avatarFile" class="form-control form-control-sm mb-3" accept="image/*" required onchange="previewImage(event)" />
-                <div class="d-flex gap-2">
-                    <button type="submit" class="btn btn-primary btn-sm rounded-pill px-3 fw-semibold">
-                        <i class="bi bi-cloud-arrow-up me-1"></i> Save Image
-                    </button>
-                    <button type="button" class="btn btn-light border btn-sm rounded-pill px-3" data-bs-toggle="collapse" data-bs-target="#changeAvatarSection">
-                        Cancel
-                    </button>
+        <div class="collapse" id="changeAvatarSection">
+            <form th:action="@{/profile/avatar}" method="post" enctype="multipart/form-data" class="px-3 pb-3 px-sm-4">
+                <label for="avatarFile" class="form-label">Choose a JPG, PNG or WebP, up to 5MB</label>
+                <div class="d-flex flex-wrap gap-2" style="max-width: 520px;">
+                    <input type="file" id="avatarFile" name="avatarFile" class="form-control flex-grow-1 w-auto" accept="image/jpeg,image/png,image/webp" required onchange="previewImage(event)">
+                    <button type="submit" class="btn btn-primary">Save photo</button>
                 </div>
+                <div class="field-error" id="avatarSizeError" role="alert" hidden>File Exceeds 5MB limit.</div>
             </form>
         </div>
-    </div>
+    </section>
 
-    <!-- Tabbed Settings Navigation -->
-    <ul class="nav nav-tabs mb-4 border-bottom" id="profileTab" role="tablist">
-        <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button" role="tab">
-                <i class="bi bi-person-vcard me-1"></i> Account Overview
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="security-tab" data-bs-toggle="tab" data-bs-target="#security" type="button" role="tab">
-                <i class="bi bi-shield-lock me-1"></i> Security & Password
-            </button>
-        </li>
-    </ul>
-
-    <!-- Tab Contents -->
-    <div class="tab-content" id="profileTabContent">
-        <!-- Overview Tab -->
-        <div class="tab-pane fade show active" id="overview" role="tabpanel">
-            <div class="row g-4">
-                <div class="col-12 col-lg-8">
-                    <div class="card-surface p-4">
-                        <h2 class="h6 fw-bold text-uppercase text-secondary mb-4" style="font-size: 0.75rem; letter-spacing: 0.05em;">
-                            Operator Information
-                        </h2>
-                        <div class="row g-3">
-                            <div class="col-sm-6">
-                                <label class="text-muted small d-block">Full Legal Name</label>
-                                <span class="fw-semibold text-dark" th:text="${user.fullname}">Full Name</span>
-                            </div>
-                            <div class="col-sm-6">
-                                <label class="text-muted small d-block">Operator Username</label>
-                                <span class="fw-semibold font-monospace text-dark" th:text="${user.username}">username</span>
-                            </div>
-                            <div class="col-sm-6">
-                                <label class="text-muted small d-block">Corporate Email</label>
-                                <span class="fw-semibold text-dark" th:text="${user.email != null ? user.email : 'Not configured'}">email@crm.com</span>
-                            </div>
-                            <div class="col-sm-6">
-                                <label class="text-muted small d-block">Registered Phone</label>
-                                <span class="fw-semibold text-dark" th:text="${user.mobileNumber != null ? user.mobileNumber : 'Not registered'}">0000000000</span>
-                            </div>
-                            <div class="col-sm-6">
-                                <label class="text-muted small d-block">Access Scope</label>
-                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-2.5 py-1 small" th:text="${user.role}">ROLE_ADMIN</span>
-                            </div>
-                            <div class="col-sm-6">
-                                <label class="text-muted small d-block">Authentication Mode</label>
-                                <span class="badge bg-light text-secondary border rounded-pill px-2.5 py-1 small">Standard Password Auth</span>
-                            </div>
+    <div class="row g-3">
+        <div class="col-lg-8">
+            <section class="card-surface card-body-pad mb-3">
+                <h2 class="section-title">Personal details</h2>
+                <form th:action="@{/profile/details}" th:object="${detailsRequest}" method="post">
+                    <div class="row g-3 mb-3">
+                        <div class="col-sm-6">
+                            <label for="fullname" class="form-label">Full name</label>
+                            <input type="text" th:field="*{fullname}" class="form-control" autocomplete="name" required>
+                            <div class="field-error" th:if="${#fields.hasErrors('fullname')}" th:errors="*{fullname}"></div>
+                        </div>
+                        <div class="col-sm-6">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" th:field="*{email}" class="form-control" autocomplete="email" required>
+                            <div class="field-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+                        </div>
+                        <div class="col-sm-6">
+                            <label for="mobileNumber" class="form-label">Mobile number (optional)</label>
+                            <input type="tel" th:field="*{mobileNumber}" class="form-control" autocomplete="tel" placeholder="10 digits">
+                            <div class="field-error" th:if="${#fields.hasErrors('mobileNumber')}" th:errors="*{mobileNumber}"></div>
+                        </div>
+                        <div class="col-sm-6">
+                            <label for="usernameReadonly" class="form-label">Username</label>
+                            <input type="text" id="usernameReadonly" class="form-control mono" th:value="${user.username}" disabled>
+                            <div class="field-hint">Used to sign in, and can't be changed.</div>
                         </div>
                     </div>
-                </div>
-
-                <div class="col-12 col-lg-4">
-                    <div class="card-surface p-4">
-                        <h2 class="h6 fw-bold text-uppercase text-secondary mb-3" style="font-size: 0.75rem; letter-spacing: 0.05em;">
-                            System Capabilities
-                        </h2>
-                        <ul class="list-unstyled small mb-0 d-flex flex-column gap-2 text-secondary">
-                            <li><i class="bi bi-check-circle-fill text-success me-2"></i> Triage and claim customer inquiries</li>
-                            <li><i class="bi bi-check-circle-fill text-success me-2"></i> Update ticket state & internal notes</li>
-                            <li><i class="bi bi-check-circle-fill text-success me-2"></i> Real-time SLA handling timers</li>
-                            <li th:if="${user.role == 'ROLE_ADMIN'}"><i class="bi bi-check-circle-fill text-success me-2"></i> Admin operational analytics</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Security Tab -->
-        <div class="tab-pane fade" id="security" role="tabpanel">
-            <div class="card-surface p-4" style="max-width: 650px;">
-                <h2 class="h5 fw-bold text-dark mb-1">Change Account Password</h2>
-                <p class="text-muted small mb-4">Ensure your account uses a passphrase of at least 6 characters.</p>
-
-                <form th:action="@{/profile/change-password}" th:object="${passwordRequest}" method="post">
-                    <div class="mb-3">
-                        <label for="currentPassword" class="form-label small fw-semibold text-secondary">Current Password</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-light text-muted border-end-0"><i class="bi bi-lock"></i></span>
-                            <input type="password" id="currentPassword" th:field="*{currentPassword}" class="form-control border-start-0" placeholder="Enter current password" required />
-                        </div>
-                        <div class="text-danger small mt-1" th:if="${#fields.hasErrors('currentPassword')}" th:errors="*{currentPassword}"></div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="newPassword" class="form-label small fw-semibold text-secondary">New Password</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-light text-muted border-end-0"><i class="bi bi-key"></i></span>
-                            <input type="password" id="newPassword" th:field="*{newPassword}" class="form-control border-start-0" placeholder="At least 6 characters" required />
-                        </div>
-                        <div class="text-danger small mt-1" th:if="${#fields.hasErrors('newPassword')}" th:errors="*{newPassword}"></div>
-                    </div>
-
-                    <div class="mb-4">
-                        <label for="confirmPassword" class="form-label small fw-semibold text-secondary">Confirm New Password</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-light text-muted border-end-0"><i class="bi bi-check2-circle"></i></span>
-                            <input type="password" id="confirmPassword" th:field="*{confirmPassword}" class="form-control border-start-0" placeholder="Re-type new password" required />
-                        </div>
-                        <div class="text-danger small mt-1" th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}"></div>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-semibold shadow-sm">
-                        <i class="bi bi-shield-check me-1"></i> Update Password
-                    </button>
+                    <button type="submit" class="btn btn-primary">Save details</button>
                 </form>
-            </div>
+            </section>
+
+            <section class="card-surface card-body-pad">
+                <h2 class="section-title mb-1">Change password</h2>
+                <p class="text-muted small mb-3">Use 8 to 72 characters with a lowercase letter, an uppercase letter, a number, and a special character (@$!%*?&amp;#).</p>
+                <form th:action="@{/profile/change-password}" th:object="${passwordRequest}" method="post">
+                    <div class="row g-3 mb-3">
+                        <div class="col-sm-6 col-xl-4">
+                            <label for="currentPassword" class="form-label">Current password</label>
+                            <input type="password" th:field="*{currentPassword}" class="form-control" autocomplete="current-password" required>
+                            <div class="field-error" th:if="${#fields.hasErrors('currentPassword')}" th:errors="*{currentPassword}"></div>
+                        </div>
+                        <div class="col-sm-6 col-xl-4">
+                            <label for="newPassword" class="form-label">New password</label>
+                            <input type="password" th:field="*{newPassword}" class="form-control" autocomplete="new-password" required>
+                            <div class="field-error" th:if="${#fields.hasErrors('newPassword')}" th:errors="*{newPassword}"></div>
+                        </div>
+                        <div class="col-sm-6 col-xl-4">
+                            <label for="confirmPassword" class="form-label">Confirm new password</label>
+                            <input type="password" th:field="*{confirmPassword}" class="form-control" autocomplete="new-password" required>
+                            <div class="field-error" th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}"></div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Update password</button>
+                </form>
+            </section>
+        </div>
+
+        <div class="col-lg-4">
+            <section class="card-surface card-body-pad mb-3">
+                <h2 class="section-title">Your work</h2>
+                <div class="stat-pair">
+                    <div>
+                        <div class="kpi-label">Active tickets</div>
+                        <div class="kpi-value" th:text="${activeTickets}">0</div>
+                    </div>
+                    <div>
+                        <div class="kpi-label">Resolved</div>
+                        <div class="kpi-value" th:text="${resolvedTickets}">0</div>
+                    </div>
+                </div>
+                <h3 class="section-title small mb-2">Recent actions</h3>
+                <div th:each="log : ${recentActions}" class="action-row">
+                    <span th:text="${log.action == 'CLAIMED_TICKET' ? 'Claimed' : (log.action == 'RESOLVED_TICKET' ? 'Resolved' : 'Updated')}">Updated</span>
+                    <a th:href="@{'/tickets/' + ${log.ticketId}}" class="ticket-id" th:text="${log.ticketId}">TKT-001</a>
+                    <div class="feed-time" th:text="${#temporals.format(log.timestamp, 'd MMM, hh:mm a')}">Time</div>
+                </div>
+                <p th:if="${#lists.isEmpty(recentActions)}" class="text-muted small mb-0">Nothing yet.</p>
+            </section>
+
+            <section th:if="${isAdmin}" class="card-surface card-body-pad">
+                <h2 class="section-title">Admin tools</h2>
+                <a th:href="@{/admin/staff}" class="tool-link"><i class="bi bi-people" aria-hidden="true"></i>Manage staff<i class="bi bi-chevron-right" aria-hidden="true"></i></a>
+                <a th:href="@{/admin/dashboard}" class="tool-link"><i class="bi bi-grid" aria-hidden="true"></i>Dashboard<i class="bi bi-chevron-right" aria-hidden="true"></i></a>
+                <a th:href="@{/admin/tickets}" class="tool-link"><i class="bi bi-card-list" aria-hidden="true"></i>All tickets<i class="bi bi-chevron-right" aria-hidden="true"></i></a>
+            </section>
         </div>
     </div>
-</div>
+</main>
 
-<!-- Interactive Toast System -->
-<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1080;">
-    <div id="feedbackToast" class="toast align-items-center text-white bg-dark border-0 shadow-lg rounded-3" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="d-flex">
-            <div class="toast-body d-flex align-items-center gap-2 py-3 px-3">
-                <i id="toastIcon" class="bi fs-5"></i>
-                <span id="toastMessageText" class="fw-medium small">Notification</span>
-            </div>
-            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-    </div>
-</div>
+<div th:replace="~{fragments/layout :: toast(${detailsSuccess ?: avatarSuccess ?: passwordSuccess ?: detailsError ?: avatarError ?: passwordError}, ${detailsError != null or avatarError != null or passwordError != null ? 'danger' : 'success'})}"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script th:inline="javascript">
-    /*<![CDATA[*/
-    const avatarSuccess = /*[[${avatarSuccess}]]*/ null;
-    const avatarError = /*[[${avatarError}]]*/ null;
-    const passwordSuccess = /*[[${passwordSuccess}]]*/ null;
-
-    document.addEventListener('DOMContentLoaded', () => {
-        const toastEl = document.getElementById('feedbackToast');
-        const toastIcon = document.getElementById('toastIcon');
-        const toastMsg = document.getElementById('toastMessageText');
-
-        if (avatarSuccess || passwordSuccess) {
-            toastIcon.className = 'bi bi-check-circle-fill text-success fs-5';
-            toastMsg.innerText = avatarSuccess || passwordSuccess;
-            new bootstrap.Toast(toastEl, { delay: 4000 }).show();
-        } else if (avatarError) {
-            toastIcon.className = 'bi bi-exclamation-octagon-fill text-danger fs-5';
-            toastMsg.innerText = avatarError;
-            new bootstrap.Toast(toastEl, { delay: 4000 }).show();
-        }
-    });
-
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+<script>
+    // Stops a too-big file before it is uploaded, and shows a preview of the chosen photo
     function previewImage(event) {
         const file = event.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                let img = document.getElementById('avatarDisplay');
-                const fallback = document.getElementById('avatarFallback');
-                if (!img) {
-                    img = document.createElement('img');
-                    img.id = 'avatarDisplay';
-                    img.className = 'avatar-circle';
-                    fallback.parentNode.replaceChild(img, fallback);
-                }
-                img.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
+        const tooBig = file && file.size > 5 * 1024 * 1024;
+        document.getElementById('avatarSizeError').hidden = !tooBig;
+        if (tooBig) {
+            event.target.value = '';
+            return;
         }
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = loaded => {
+            let img = document.getElementById('avatarDisplay');
+            if (!img) {
+                img = document.createElement('img');
+                img.id = 'avatarDisplay';
+                img.className = 'avatar avatar-lg';
+                img.alt = 'Your photo';
+                document.getElementById('avatarFallback').replaceWith(img);
+            }
+            img.src = loaded.target.result;
+        };
+        reader.readAsDataURL(file);
     }
-    /*]]>*/
 </script>
 </body>
 </html>

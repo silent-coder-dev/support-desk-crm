@@ -25,6 +25,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TicketWebController {
 
+    private static final String CONFLICT_MESSAGE = "Conflict detected: Ticket was updated by another operator. Please review latest state.";
+
     private final TicketService ticketService;
     private final SseNotificationService sseNotificationService;
 
@@ -42,22 +44,16 @@ public class TicketWebController {
         model.addAttribute("tickets", tickets);
         model.addAttribute("selectedStatus", status);
         model.addAttribute("searchQuery", search);
+        model.addAttribute("ticketLimit", TicketService.TICKET_LIST_LIMIT);
         return "tickets/dashboard";
     }
 
-    // 2. Direct Handler for UI requests hitting /tickets/admin/all-tickets
+    // 2. Aliases for admin navigation links
     @GetMapping("/tickets/admin/all-tickets")
-    public String adminAllTicketsView(@RequestParam(required = false) TicketStatus status,
-                                      @RequestParam(required = false) String search,
-                                      Model model) {
-        List<TicketSummaryResponse> tickets = ticketService.getAllTickets(status, search);
-        model.addAttribute("tickets", tickets);
-        model.addAttribute("selectedStatus", status);
-        model.addAttribute("searchQuery", search);
-        return "tickets/admin/all-tickets";
+    public String adminAllTicketsView() {
+        return "forward:/admin/tickets";
     }
 
-    // 3. Fallbacks for admin navigation links
     @GetMapping("/tickets/admin/dashboard")
     public String returnToAdminDashboard() {
         return "redirect:/admin/dashboard";
@@ -91,8 +87,8 @@ public class TicketWebController {
     }
 
     @GetMapping("/tickets/{ticket_id}")
-    public String viewDetail(@PathVariable String ticket_id, Model model) {
-        TicketDetailResponse ticket = ticketService.getTicketByTicketId(ticket_id);
+    public String viewDetail(@PathVariable("ticket_id") String ticketId, Model model) {
+        TicketDetailResponse ticket = ticketService.getTicketByTicketId(ticketId);
         model.addAttribute("ticket", ticket);
         if (!model.containsAttribute("updateRequest")) {
             UpdateTicketRequest updateReq = new UpdateTicketRequest();
@@ -104,21 +100,26 @@ public class TicketWebController {
     }
 
     @PostMapping("/tickets/{ticket_id}/update")
-    public String updateTicket(@PathVariable String ticket_id,
-                               @ModelAttribute("updateRequest") UpdateTicketRequest request,
+    public String updateTicket(@PathVariable("ticket_id") String ticketId,
+                               @Valid @ModelAttribute("updateRequest") UpdateTicketRequest request,
+                               BindingResult bindingResult,
                                Authentication auth,
                                RedirectAttributes redirectAttributes) {
-        try {
-            String loggedInUsername = auth != null ? auth.getName() : null;
-            ticketService.updateTicket(ticket_id, request, loggedInUsername);
-            redirectAttributes.addFlashAttribute("toastMessage", "Ticket status and notes updated successfully!");
-            redirectAttributes.addFlashAttribute("toastType", "success");
-        } catch (OptimisticLockingFailureException ex) {
-            redirectAttributes.addFlashAttribute("toastMessage", "Conflict detected: Ticket was updated by another operator. Please review latest state.");
-            redirectAttributes.addFlashAttribute("toastType", "danger");
+        if (bindingResult.hasErrors()) {
+            addToast(redirectAttributes, "danger", bindingResult.getAllErrors().getFirst().getDefaultMessage());
+            return "redirect:/tickets/" + ticketId;
         }
 
-        return "redirect:/tickets/" + ticket_id;
+        try {
+            ticketService.updateTicket(ticketId, request, auth.getName());
+            addToast(redirectAttributes, "success", "Ticket status and notes updated successfully!");
+        } catch (IllegalStateException ex) {
+            addToast(redirectAttributes, "danger", ex.getMessage());
+        } catch (OptimisticLockingFailureException ex) {
+            addToast(redirectAttributes, "danger", CONFLICT_MESSAGE);
+        }
+
+        return "redirect:/tickets/" + ticketId;
     }
 
     @PostMapping("/tickets/{ticket_id}/claim")
@@ -126,12 +127,12 @@ public class TicketWebController {
                               Authentication auth,
                               RedirectAttributes redirectAttributes) {
         try {
-            ticketService.claimTicket(ticketId, auth != null ? auth.getName() : null);
-            redirectAttributes.addFlashAttribute("toastMessage", "Ticket successfully claimed by you!");
-            redirectAttributes.addFlashAttribute("toastType", "success");
-        } catch (Exception ex) {
-            redirectAttributes.addFlashAttribute("toastMessage", ex.getMessage());
-            redirectAttributes.addFlashAttribute("toastType", "danger");
+            ticketService.claimTicket(ticketId, auth.getName());
+            addToast(redirectAttributes, "success", "Ticket successfully claimed by you!");
+        } catch (IllegalStateException ex) {
+            addToast(redirectAttributes, "danger", ex.getMessage());
+        } catch (OptimisticLockingFailureException ex) {
+            addToast(redirectAttributes, "danger", CONFLICT_MESSAGE);
         }
         return "redirect:/tickets/" + ticketId;
     }
@@ -141,12 +142,12 @@ public class TicketWebController {
                                 Authentication auth,
                                 RedirectAttributes redirectAttributes) {
         try {
-            ticketService.resolveTicket(ticketId, auth != null ? auth.getName() : null);
-            redirectAttributes.addFlashAttribute("toastMessage", "Ticket marked as CLOSED!");
-            redirectAttributes.addFlashAttribute("toastType", "success");
-        } catch (Exception ex) {
-            redirectAttributes.addFlashAttribute("toastMessage", ex.getMessage());
-            redirectAttributes.addFlashAttribute("toastType", "danger");
+            ticketService.resolveTicket(ticketId, auth.getName());
+            addToast(redirectAttributes, "success", "Ticket marked as CLOSED!");
+        } catch (IllegalStateException ex) {
+            addToast(redirectAttributes, "danger", ex.getMessage());
+        } catch (OptimisticLockingFailureException ex) {
+            addToast(redirectAttributes, "danger", CONFLICT_MESSAGE);
         }
         return "redirect:/tickets/" + ticketId;
     }
@@ -155,5 +156,10 @@ public class TicketWebController {
     @ResponseBody
     public SseEmitter liveStream() {
         return sseNotificationService.subscribe();
+    }
+
+    private void addToast(RedirectAttributes redirectAttributes, String type, String message) {
+        redirectAttributes.addFlashAttribute("toastMessage", message);
+        redirectAttributes.addFlashAttribute("toastType", type);
     }
 }
